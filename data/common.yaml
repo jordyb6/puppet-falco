@@ -1,11 +1,11 @@
 ---
 # Configuration options
-falco::falco_version:
+falco::falco_version: '-0.34.1'
 
 falco::probe_type: -kmod
 
 falco::build_driver: false
-falco::build_type:
+falco::build_type: bpf
 
 falco::environment: 'FALCO_BPF_PROBE='
 
@@ -13,7 +13,7 @@ falco::rules_file:
   - '/etc/falco/falco_rules.yaml'
   - '/etc/falco/falco_rules.local.yaml'
   - '/etc/falco/rules.d'
-falco::local_rules:
+falco::local_rules: []
 falco::watch_config_files: true
 falco::json_output: true
 falco::json_include_output_property: true

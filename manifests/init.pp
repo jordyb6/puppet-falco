@@ -200,13 +200,13 @@
 class falco (
   # Configuration parameters
 
-  Optional[String] $falco_version,
+  String $falco_version,
 
   # If falco version is earlier than 0.34, keep probe_type empty
-  Optional[Enum['-bpf','-kmod','-modern-bpf']] $probe_type,
+  Enum['-bpf','-kmod','-modern-bpf',''] $probe_type,
 
   Boolean $build_driver,
-  Optional[Enum['bpf']] $build_type,
+  Enum['bpf',''] $build_type,
 
   String $environment,
 
@@ -251,7 +251,7 @@ class falco (
   contain falco::install
   contain falco::config
   contain falco::service
-  
+
   if $falco::build_driver or ((($falco::falco_version =~ /\-0\.[0-2]?[0-9]\.[0-9]*/ or $falco::falco_version =~ /\-0\.3?[0-3]\.[0-9]*/)
     and $falco::build_type == 'bpf')){
     exec{'build driver':
