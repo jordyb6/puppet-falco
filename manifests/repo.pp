@@ -23,6 +23,9 @@ class falco::repo inherits falco {
       }
 
       ensure_packages(["linux-headers-${facts['kernelrelease']}"])
+      if $falco::build_driver and $falco::build_type == 'bpf' {
+        ensure_packages(['clang','llvm'])
+      }
     }
     'RedHat': {
       include 'epel'
@@ -38,6 +41,9 @@ class falco::repo inherits falco {
       }
 
       ensure_packages(["kernel-devel-${facts['kernelrelease']}"])
+      if $falco::build_driver and $falco::build_type == 'bpf' {
+        ensure_packages(['clang','llvm'])
+      }
     }
     'Suse': {
       if $facts['os']['release']['full'] == '12.5' {
@@ -74,6 +80,9 @@ class falco::repo inherits falco {
       }
 
       ensure_packages(['kernel-default-devel'])
+      if $falco::build_driver and $falco::build_type == 'bpf' {
+        ensure_packages(['clang','llvm'])
+      }
     }
     default: {
       fail("\"${module_name}\" provides no repository information for OSfamily \"${facts['os']['family']}\"")
