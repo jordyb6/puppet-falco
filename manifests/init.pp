@@ -86,6 +86,12 @@
 # @param [Enum] probe_type
 #    Decide which mode you want to run Falco with.
 #
+# @param [Boolean] build_driver
+#    Set to true if you want to build the driver locally.
+#
+# @param [Enum] build_type
+#    Decide which type of driver you want to build
+#
 # @param [Array] rules_file
 #   File(s) or Directories containing Falco rules, loaded at startup.
 #   The name "rules_file" is only for backwards compatibility.
@@ -196,6 +202,9 @@ class falco (
   # If falco version is earlier than 0.34, keep probe_type empty
   Optional[Enum['-bpf','-kmod','-modern-bpf']] $probe_type,
 
+  Boolean $build_driver,
+  Enum['bpf',''] $build_type,
+
   Array $rules_file,
   Array[Hash] $local_rules,
   Boolean $watch_config_files,
@@ -237,4 +246,14 @@ class falco (
   contain falco::install
   contain falco::config
   contain falco::service
+  
+  if $falco::build_driver or ((($falco::falco_version =~ /\-0\.[0-2]?[0-9]\.[0-9]*/ or $falco::falco_version =~ /\-0\.3?[0-3]\.[0-9]*/)
+    and $falco::build_type == 'bpf')){
+    exec{'build driver':
+      path      => $::path,
+      command   => "falco-driver-loader ${falco::build_type}",
+      unless    => 'lsmod | grep falco',
+      subscribe => Package["falco${falco::falco_version}"],
+      notify    => Service["falco${falco::probe_type}"],
+    }}
 }
