@@ -183,68 +183,37 @@
 #
 class falco (
   # Configuration parameters
-  Array $rules_file = [
-    '/etc/falco/falco_rules.yaml',
-    '/etc/falco/falco_rules.local.yaml',
-    '/etc/falco/k8s_audit_rules.yaml',
-    '/etc/falco/rules.d',
-  ],
-  Array[Hash] $local_rules = [],
-  Boolean $watch_config_files = true,
-  Boolean $json_output = false,
-  Boolean $json_include_output_property = true,
+  Array $rules_file,
+  Array[Hash] $local_rules,
+  Boolean $watch_config_files,
+  Boolean $json_output,
+  Boolean $json_include_output_property,
 
-  Boolean $log_stderr = true,
-  Boolean $log_syslog = true,
-  Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level = 'info',
-  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug'] $priority = 'debug',
-  Hash $libs_logger = {
-    'enabled'   => false,
-    'severity'  => 'debug',
-  },
+  Boolean $log_stderr,
+  Boolean $log_syslog,
+  Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level,
+  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug'] $priority,
+  Hash $libs_logger,
 
-  Boolean $buffered_outputs = false,
-  Integer $syscall_buf_size_preset = 4,
-  Integer $outputs_rate = 1,
-  Integer $outputs_max_burst = 1000,
+  Boolean $buffered_outputs,
+  Integer $syscall_buf_size_preset,
+  Integer $outputs_rate,
+  Integer $outputs_max_burst,
 
-  Hash $syslog_output = {
-    'enabled' => true,
-  },
-  Hash $file_output = {
-    'enabled'    => false,
-    'keep_alive' => false,
-    'filename'   => '/var/log/falco-events.log',
-  },
-  Hash $stdout_output = {
-    'enabled' => true,
-  },
-  Hash $webserver = {
-    'enabled'              => false,
-    'listen_port'          => 8765,
-    'k8s_audit_endpoint'   => '/k8s-audit',
-    'k8s_healthz_endpoint' => '/healthz',
-    'ssl_enabled'          => false,
-    'ssl_certificate'      => '/etc/falco/falco.pem',
-  },
-  Hash $program_output = {
-    'enabled'    => false,
-    'keep_alive' => false,
-    'program'    => '"jq \'{text: .output}\' | curl -d @- -X POST https://hooks.slack.com/services/XXX"',
-  },
-  Hash $http_output = {
-    'enabled'    => false,
-    'url'        => 'http://some.url',
-    'user_agent' => '"falcosecurity/falco"',
-  },
+  Hash $syslog_output,
+  Hash $file_output,
+  Hash $stdout_output,
+  Hash $webserver,
+  Hash $program_output,
+  Hash $http_output,
 
   # Installation parameters
-  String[1] $package_ensure = 'installed',
+  String[1] $package_ensure,
 
   # Service parameters
-  Variant[Boolean, Enum['running', 'stopped']] $service_ensure = 'running',
-  Boolean $service_enable = true,
-  Boolean $service_restart = true,
+  Variant[Boolean, Enum['running', 'stopped']] $service_ensure,
+  Boolean $service_enable,
+  Boolean $service_restart,
 ) {
   Class['falco::repo']
   -> Class['falco::install']

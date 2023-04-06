@@ -1,0 +1,56 @@
+---
+# Configuration options
+falco::rules_file:
+  - '/etc/falco/falco_rules.yaml'
+  - '/etc/falco/falco_rules.local.yaml'
+  - '/etc/falco/rules.d'
+falco::local_rules:
+falco::watch_config_files: true
+falco::json_output: true
+falco::json_include_output_property: true
+
+falco::log_stderr: true
+falco::log_syslog: true
+falco::log_level: 'info'
+falco::priority: 'debug'
+falco::libs_logger:
+  enabled: false
+  severity: debug
+
+falco::buffered_outputs: false
+falco::syscall_buf_size_preset: 4
+falco::outputs_rate: 1
+falco::outputs_max_burst: 1000
+
+falco::syslog_output:
+  enabled: true
+falco::file_output:
+  enabled: false
+  keep_alive: false
+  filename: /var/log/falco-events.log
+falco::stdout_output:
+  enabled: true
+falco::webserver:
+  enabled: false
+  listen_port: 8765,
+  k8s_audit_endpoint: /k8s-audit
+  k8s_healthz_endpoint: /healthz
+  ssl_enabled: false
+  ssl_certificate: /etc/falco/falco.pem
+falco::program_output:
+  enabled: false
+  keep_alive: false
+  program: jq
+falco::http_output:
+  enabled: false
+  url: http://some.url
+  user_agent: "falcosecurity/falco"
+
+# Installation parameters
+falco::package_ensure: 'installed'
+
+# Service
+falco::service_ensure: 'running'
+falco::service_enable: true
+falco::service_restart: true
+falco::service_hasstatus: true
