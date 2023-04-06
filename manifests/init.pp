@@ -92,6 +92,9 @@
 # @param [Enum] build_type
 #    Decide which type of driver you want to build
 #
+# @param [String] environment
+#    Adds environment variable to run falco service in bpf mode.
+#
 # @param [Array] rules_file
 #   File(s) or Directories containing Falco rules, loaded at startup.
 #   The name "rules_file" is only for backwards compatibility.
@@ -204,6 +207,8 @@ class falco (
 
   Boolean $build_driver,
   Enum['bpf',''] $build_type,
+
+  String $environment,
 
   Array $rules_file,
   Array[Hash] $local_rules,
