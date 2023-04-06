@@ -10,7 +10,7 @@ class falco::config inherits falco {
       group   => 'root',
       mode    => '0644',
       require => Class['falco::install'],
-      notify  => Service['falco'],
+      notify  => Service["falco${falco::probe_type}"],
       ;
     '/etc/falco/falco.yaml':
       content => template('falco/falco.yaml.erb'),

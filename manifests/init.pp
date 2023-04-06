@@ -78,6 +78,14 @@
 #     ],
 #   }
 #
+#
+# @param [String] falco_version
+#    Set falco version.
+#    Default is latest.
+#
+# @param [Enum] probe_type
+#    Decide which mode you want to run Falco with.
+#
 # @param [Array] rules_file
 #   File(s) or Directories containing Falco rules, loaded at startup.
 #   The name "rules_file" is only for backwards compatibility.
@@ -180,9 +188,14 @@
 # @param [Boolean] service_restart
 #    Does the service support restarting?
 #
-#
 class falco (
   # Configuration parameters
+
+  Optional[String] $falco_version,
+
+  # If falco version is earlier than 0.34, keep probe_type empty
+  Optional[Enum['-bpf','-kmod','-modern-bpf']] $probe_type,
+
   Array $rules_file,
   Array[Hash] $local_rules,
   Boolean $watch_config_files,
