@@ -2,12 +2,16 @@
 # Configuration options
 falco::falco_version: '-0.34.1'
 
-falco::probe_type: -kmod
+falco::probe_type: -bpf
 
 falco::build_driver: false
 falco::build_type: bpf
 
 falco::environment: 'FALCO_BPF_PROBE='
+
+falco::manage_rpm: false
+falco::package_source: 'https://download.falco.org/packages/rpm/falco-0.34.1-x86_64.rpm'
+falco::rpm_install_options: ''
 
 falco::rules_file:
   - '/etc/falco/falco_rules.yaml'

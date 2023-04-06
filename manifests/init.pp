@@ -210,6 +210,10 @@ class falco (
 
   String $environment,
 
+  Boolean $manage_rpm,
+  String $package_source,
+  String $rpm_install_options,
+
   Array $rules_file,
   Array[Hash] $local_rules,
   Boolean $watch_config_files,
@@ -255,10 +259,12 @@ class falco (
   if $falco::build_driver or ((($falco::falco_version =~ /\-0\.[0-2]?[0-9]\.[0-9]*/ or $falco::falco_version =~ /\-0\.3?[0-3]\.[0-9]*/)
     and $falco::build_type == 'bpf')){
     exec{'build driver':
-      path      => $::path,
-      command   => "falco-driver-loader ${falco::build_type}",
-      unless    => 'lsmod | grep falco',
-      subscribe => Package["falco${falco::falco_version}"],
-      notify    => Service["falco${falco::probe_type}"],
+      path        => $::path,
+      command     => "falco-driver-loader ${falco::build_type}",
+      unless      => 'lsmod | grep falco',
+      logoutput   => true,
+      environment => ['HOME=/root'],
+      subscribe   => Package["falco${falco::falco_version}"],
+      notify      => Service["falco${falco::probe_type}"],
     }}
 }
