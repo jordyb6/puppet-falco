@@ -1,5 +1,14 @@
 ---
 # Configuration options
+falco::falco_version:
+
+falco::probe_type: -kmod
+
+falco::build_driver: false
+falco::build_type:
+
+falco::environment: 'FALCO_BPF_PROBE='
+
 falco::rules_file:
   - '/etc/falco/falco_rules.yaml'
   - '/etc/falco/falco_rules.local.yaml'
