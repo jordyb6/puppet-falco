@@ -206,7 +206,7 @@ class falco (
   Optional[Enum['-bpf','-kmod','-modern-bpf']] $probe_type,
 
   Boolean $build_driver,
-  Enum['bpf',''] $build_type,
+  Optional[Enum['bpf']] $build_type,
 
   String $environment,
 
