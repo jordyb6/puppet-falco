@@ -20,11 +20,9 @@ class falco::config inherits falco {
       ;
   }
 
-  $_file_output = $falco::file_output
-
   if ($_file_output != undef) {
     logrotate::rule { 'falco_output':
-      path          => $_file_output['filename'],
+      path          => $falco::file_output['filename'],
       rotate        => 5,
       rotate_every  => 'day',
       size          => '1M',
