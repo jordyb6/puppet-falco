@@ -200,6 +200,8 @@
 class falco (
   # Configuration parameters
 
+  Boolean $manage_repo,
+
   String $falco_version,
 
   # If falco version is earlier than 0.34, keep probe_type empty

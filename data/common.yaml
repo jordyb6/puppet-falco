@@ -1,5 +1,6 @@
 ---
 # Configuration options
+falco::manage_repo: false
 falco::falco_version: '-0.34.1'
 
 falco::probe_type: -bpf
