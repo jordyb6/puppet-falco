@@ -1,4 +1,3 @@
-
 # @summary Controls the contents of falco.yaml and sets up log rotate, if needed
 #
 # Controls the contents of falco.yaml and sets up log rotate, if needed
