@@ -1,3 +1,4 @@
+
 # @summary Controls the contents of falco.yaml and sets up log rotate, if needed
 #
 # Controls the contents of falco.yaml and sets up log rotate, if needed
@@ -10,7 +11,7 @@ class falco::config inherits falco {
       group   => 'root',
       mode    => '0644',
       require => Class['falco::install'],
-      notify  => Service["falco${falco::probe_type}"],
+      notify  => Service["falco-${falco::driver}"],
       ;
     '/etc/falco/falco.yaml':
       content => template('falco/falco.yaml.erb'),
@@ -20,9 +21,11 @@ class falco::config inherits falco {
       ;
   }
 
-  if ($falco::file_output != undef) {
+  $_file_output = $falco::file_output
+
+  if ($_file_output != undef) {
     logrotate::rule { 'falco_output':
-      path          => $falco::file_output['filename'],
+      path          => $_file_output['filename'],
       rotate        => 5,
       rotate_every  => 'day',
       size          => '1M',

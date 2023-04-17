@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v2.0.0](https://github.com/voxpupuli/puppet-falco/tree/v2.0.0) (2023-04-13)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v1.2.0...v2.0.0)
+
+**Breaking changes:**
+
+- \(ITSYS-2824\) Falco \>= 0.34.0 Compatibility [\#20](https://github.com/voxpupuli/puppet-falco/pull/20) ([yachub](https://github.com/yachub))
+
+## [v1.2.0](https://github.com/voxpupuli/puppet-falco/tree/v1.2.0) (2023-04-11)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v1.1.0...v1.2.0)
+
+**Implemented enhancements:**
+
+- Add support for SUSE Linux, add EL 9 to metadata [\#13](https://github.com/voxpupuli/puppet-falco/pull/13) ([genebean](https://github.com/genebean))
+
+**Fixed bugs:**
+
+- Apt key errors [\#16](https://github.com/voxpupuli/puppet-falco/issues/16)
+- Update repo keys [\#17](https://github.com/voxpupuli/puppet-falco/pull/17) ([genebean](https://github.com/genebean))
+
 ## [v1.1.0](https://github.com/voxpupuli/puppet-falco/tree/v1.1.0) (2022-06-01)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v1.0.1...v1.1.0)
@@ -25,7 +46,6 @@ These should not affect the functionality of the module.
 [Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v0.4.0...v1.0.0)
 
 This is the first release as part of Vox Pupuli.
-
 This module is derrived from [falcosecurity/evolution](https://github.com/falcosecurity/evolution/tree/33a3025d1dedc3a6fbea814b8f3f80d275d6e3f0/integrations/puppet-module/falco). That code came from [falcosecurity/falco](https://github.com/falcosecurity/falco) as part of resolving issue https://github.com/falcosecurity/falco/issues/1114. The old code is the basis for [sysdig/falco](https://forge.puppet.com/modules/sysdig/falco). https://github.com/falcosecurity/falco/issues/2005 was submitted to request that module be depreciated since it appears to be abandoned.
 
 The v1.0.0 release includes an overhaul of the code to make everything work and bring it up to current coding standards. It also incorporates all the change needed as part of migrating a module to Vox Pupuli.

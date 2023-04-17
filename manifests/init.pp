@@ -78,23 +78,6 @@
 #     ],
 #   }
 #
-#
-# @param [String] falco_version
-#    Set falco version.
-#    Default is latest.
-#
-# @param [Enum] probe_type
-#    Decide which mode you want to run Falco with.
-#
-# @param [Boolean] build_driver
-#    Set to true if you want to build the driver locally.
-#
-# @param [Enum] build_type
-#    Decide which type of driver you want to build
-#
-# @param [String] environment
-#    Adds environment variable to run falco service in bpf mode.
-#
 # @param [Array] rules_file
 #   File(s) or Directories containing Falco rules, loaded at startup.
 #   The name "rules_file" is only for backwards compatibility.
@@ -111,10 +94,6 @@
 #
 # @param [Array[Hash]] local_rules
 #   An array of hashes of rules to be added to /etc/falco/falco_rules.local.yaml
-#
-# @param [Boolean] watch_config_files
-#   Whether to do a hot reload upon modification of the config
-#   file or any loaded rule file
 #
 # @param [Boolean] json_output
 #   Whether to output events in json or text
@@ -144,16 +123,9 @@
 #   of "emergency", "alert", "critical", "error", "warning", "notice",
 #   "informational", "debug".
 #
-# @param [Hash] libs_logger
-#   Hash to enable the libs logger sending its log records the same outputs
-#   supported by falco (stderr and syslog).
-#
 # @param [Boolean] buffered_outputs
 #   Whether or not output to any of the output channels below is
 #   buffered. Defaults to false
-#
-# @param [Integer] syscall_buf_size_preset
-#   Integer between 1 and 10. Sets the dimension of the syscall ring buffers.
 #
 # @param [Integer] outputs_rate
 #   The number of tokens (i.e. right to send a notification) gained per second.
@@ -185,6 +157,11 @@
 #   A hash to configure the http output.
 #   See the template for available keys.
 #
+# @param [Enum['bpf', 'modern-bpf', 'kmod']] driver 
+#  The desired Falco driver.
+#  Can be one of "bpf", "modern-bpf", "kmod".
+#  Defaults to "kmod"
+#
 # @param [String[1]] package_ensure
 #   A string to be passed to the package resource's ensure parameter
 #
@@ -197,56 +174,81 @@
 # @param [Boolean] service_restart
 #    Does the service support restarting?
 #
+# @param [Boolean] auto_ruleset_updates
+#    Enable automatic rule updates?
+#
+# @param [Boolean] manage_repo
+#    When true, let the module manage the repositories.
+#    Default is true.
+#
+# @param [Boolean] build_driver
+#    Let the module handle building of the drivers.
+#    Default is true.
+#
 class falco (
   # Configuration parameters
+  Boolean $manage_repo = true,
+  Boolean $build_driver = true,
 
-  Boolean $manage_repo,
+  Array $rules_file = [
+    '/etc/falco/falco_rules.yaml',
+    '/etc/falco/falco_rules.local.yaml',
+    '/etc/falco/k8s_audit_rules.yaml',
+    '/etc/falco/rules.d',
+  ],
+  Array[Hash] $local_rules = [],
+  Boolean $json_output = false,
+  Boolean $json_include_output_property = true,
 
-  String $falco_version,
+  Boolean $log_stderr = true,
+  Boolean $log_syslog = true,
+  Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level = 'info',
+  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug'] $priority = 'debug',
 
-  # If falco version is earlier than 0.34, keep probe_type empty
-  Enum['-bpf','-kmod','-modern-bpf',''] $probe_type,
+  Boolean $buffered_outputs = false,
+  Integer $outputs_rate = 1,
+  Integer $outputs_max_burst = 1000,
 
-  Boolean $build_driver,
-  Enum['bpf',''] $build_type,
+  Hash $syslog_output = {
+    'enabled' => true,
+  },
+  Hash $file_output = {
+    'enabled'    => false,
+    'keep_alive' => false,
+    'filename'   => '/var/log/falco-events.log',
+  },
+  Hash $stdout_output = {
+    'enabled' => true,
+  },
+  Hash $webserver = {
+    'enabled'              => false,
+    'listen_port'          => 8765,
+    'k8s_audit_endpoint'   => '/k8s-audit',
+    'k8s_healthz_endpoint' => '/healthz',
+    'ssl_enabled'          => false,
+    'ssl_certificate'      => '/etc/falco/falco.pem',
+  },
+  Hash $program_output = {
+    'enabled'    => false,
+    'keep_alive' => false,
+    'program'    => '"jq \'{text: .output}\' | curl -d @- -X POST https://hooks.slack.com/services/XXX"',
+  },
+  Hash $http_output = {
+    'enabled'    => false,
+    'url'        => 'http://some.url',
+    'user_agent' => '"falcosecurity/falco"',
+  },
 
-  String $environment,
-
-  Boolean $manage_rpm,
-  String $package_source,
-  String $rpm_install_options,
-
-  Array $rules_file,
-  Array[Hash] $local_rules,
-  Boolean $watch_config_files,
-  Boolean $json_output,
-  Boolean $json_include_output_property,
-
-  Boolean $log_stderr,
-  Boolean $log_syslog,
-  Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level,
-  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug'] $priority,
-  Hash $libs_logger,
-
-  Boolean $buffered_outputs,
-  Integer $syscall_buf_size_preset,
-  Integer $outputs_rate,
-  Integer $outputs_max_burst,
-
-  Hash $syslog_output,
-  Hash $file_output,
-  Hash $stdout_output,
-  Hash $webserver,
-  Hash $program_output,
-  Hash $http_output,
+  Enum['bpf', 'modern-bpf', 'kmod'] $driver = 'kmod',
 
   # Installation parameters
-  String[1] $package_ensure,
+  String[1] $package_ensure = '>= 0.34',
 
   # Service parameters
-  Variant[Boolean, Enum['running', 'stopped']] $service_ensure,
-  Boolean $service_enable,
-  Boolean $service_restart,
+  Variant[Boolean, Enum['running', 'stopped']] $service_ensure = 'running',
+  Boolean $service_enable = true,
+  Boolean $service_restart = true,
+  Boolean $auto_ruleset_updates = true,
 ) {
   Class['falco::repo']
   -> Class['falco::install']
@@ -257,16 +259,4 @@ class falco (
   contain falco::install
   contain falco::config
   contain falco::service
-
-  if $falco::build_driver or ((($falco::falco_version =~ /\-0\.[0-2]?[0-9]\.[0-9]*/ or $falco::falco_version =~ /\-0\.3?[0-3]\.[0-9]*/)
-    and $falco::build_type == 'bpf')){
-    exec{'build driver':
-      path        => $::path,
-      command     => "falco-driver-loader ${falco::build_type}",
-      unless      => 'lsmod | grep falco',
-      logoutput   => true,
-      environment => ['HOME=/root'],
-      subscribe   => Package["falco${falco::falco_version}"],
-      notify      => Service["falco${falco::probe_type}"],
-    }}
 }

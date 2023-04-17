@@ -3,7 +3,7 @@
 # Manages the repository falco is installed from
 #
 class falco::repo inherits falco {
-  if $falco::manage_repo == false {
+  if falco::manage_repo {
     case $facts['os']['family'] {
       'Debian': {
         include apt
@@ -22,11 +22,6 @@ class falco::repo inherits falco {
           release  => 'stable',
           repos    => 'main',
         }
-
-        ensure_packages(["linux-headers-${facts['kernelrelease']}"])
-        if $falco::build_driver and $falco::build_type == 'bpf' {
-          ensure_packages(['clang','llvm'])
-        }
       }
       'RedHat': {
         include 'epel'
@@ -39,11 +34,6 @@ class falco::repo inherits falco {
           descr    => 'Falco repository',
           enabled  => 1,
           gpgcheck => 0,
-        }
-
-        ensure_packages(["kernel-devel-${facts['kernelrelease']}"])
-        if $falco::build_driver and $falco::build_type == 'bpf' {
-          ensure_packages(['clang','llvm'])
         }
       }
       'Suse': {
@@ -79,15 +69,10 @@ class falco::repo inherits falco {
           repo_gpgcheck => 0,
           enabled       => 1,
         }
-
-        ensure_packages(['kernel-default-devel'])
-        if $falco::build_driver and $falco::build_type == 'bpf' {
-          ensure_packages(['clang','llvm'])
-        }
       }
       default: {
         fail("\"${module_name}\" provides no repository information for OSfamily \"${facts['os']['family']}\"")
       }
     }
-}
+  }
 }

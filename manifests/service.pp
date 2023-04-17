@@ -1,21 +1,21 @@
-# @summary Controls the state of the falco service
+# @summary Controls the state of the falco and falcoctl services
 #
-# Controls the state of the falco service
+# Controls the state of the falco and falcoctl services
 #
 class falco::service inherits falco {
-
-if ($falco::falco_version =~ /\-0\.[0-2]?[0-9]\.[0-9]*/ or $falco::falco_version =~ /\-0\.3?[0-3]\.[0-9]*/)
-{
-  systemd::dropin_file { 'falco.override.conf':
-    unit    => 'falco.service',
-    content => epp('falco/falco.override.conf.epp', { environment => $falco::environment}),
-    notify  => Service["falco${falco::probe_type}"],
+  service { "falco-${falco::driver}":
+    ensure     => $falco::service_ensure,
+    enable     => $falco::service_enable,
+    hasstatus  => true,
+    hasrestart => $falco::service_restart,
   }
-}
-service { "falco${falco::probe_type}":
-  ensure     => $falco::service_ensure,
-  enable     => $falco::service_enable,
-  hasstatus  => true,
-  hasrestart => $falco::service_restart,
-}
+
+  # Stop and mask the automatic ruleset updates service if automatic ruleset
+  # updates are disabled. Otherwise, it's state is managed by the falco service.
+  unless $falco::auto_ruleset_updates {
+    service { 'falcoctl-artifact-follow':
+      ensure => 'stopped',
+      enable => 'mask',
+    }
+  }
 }

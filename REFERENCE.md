@@ -10,7 +10,7 @@
 * [`falco::config`](#falco--config): Controls the contents of falco.yaml and sets up log rotate, if needed
 * [`falco::install`](#falco--install): Installs the falco package
 * [`falco::repo`](#falco--repo): Manages the repository falco is installed from
-* [`falco::service`](#falco--service): Controls the state of the falco service
+* [`falco::service`](#falco--service): Controls the state of the falco and falcoctl services
 
 ## Classes
 
@@ -117,16 +117,13 @@ The following parameters are available in the `falco` class:
 
 * [`rules_file`](#-falco--rules_file)
 * [`local_rules`](#-falco--local_rules)
-* [`watch_config_files`](#-falco--watch_config_files)
 * [`json_output`](#-falco--json_output)
 * [`json_include_output_property`](#-falco--json_include_output_property)
 * [`log_stderr`](#-falco--log_stderr)
 * [`log_syslog`](#-falco--log_syslog)
 * [`log_level`](#-falco--log_level)
 * [`priority`](#-falco--priority)
-* [`libs_logger`](#-falco--libs_logger)
 * [`buffered_outputs`](#-falco--buffered_outputs)
-* [`syscall_buf_size_preset`](#-falco--syscall_buf_size_preset)
 * [`outputs_rate`](#-falco--outputs_rate)
 * [`outputs_max_burst`](#-falco--outputs_max_burst)
 * [`syslog_output`](#-falco--syslog_output)
@@ -135,10 +132,12 @@ The following parameters are available in the `falco` class:
 * [`webserver`](#-falco--webserver)
 * [`program_output`](#-falco--program_output)
 * [`http_output`](#-falco--http_output)
+* [`driver`](#-falco--driver)
 * [`package_ensure`](#-falco--package_ensure)
 * [`service_ensure`](#-falco--service_ensure)
 * [`service_enable`](#-falco--service_enable)
 * [`service_restart`](#-falco--service_restart)
+* [`auto_ruleset_updates`](#-falco--auto_ruleset_updates)
 
 ##### <a name="-falco--rules_file"></a>`rules_file`
 
@@ -175,14 +174,6 @@ Data type: `Array[Hash]`
 An array of hashes of rules to be added to /etc/falco/falco_rules.local.yaml
 
 Default value: `[]`
-
-##### <a name="-falco--watch_config_files"></a>`watch_config_files`
-
-Data type: `Boolean`
-
-Whether to do a hot reload upon modification of the config file or any loaded rule file
-
-Default value: `true`
 
 ##### <a name="-falco--json_output"></a>`json_output`
 
@@ -242,22 +233,6 @@ of "emergency", "alert", "critical", "error", "warning", "notice",
 
 Default value: `'debug'`
 
-##### <a name="-falco--libs_logger"></a>`libs_logger`
-
-Data type: `Hash`
-
-If enabled, the libs logger sends its log records the same outputs supported by falco (stderr and syslog).
-See the template for available keys.
-
-Default value:
-
-```puppet
-{
-    'enabled'    => false,
-    'severity'   => 'debug',
-  }
-```
-
 ##### <a name="-falco--buffered_outputs"></a>`buffered_outputs`
 
 Data type: `Boolean`
@@ -266,14 +241,6 @@ Whether or not output to any of the output channels below is
 buffered. Defaults to false
 
 Default value: `false`
-
-##### <a name="-falco--syscall_buf_size_preset"></a>`syscall_buf_size_preset`
-
-Data type: `Integer`
-
-Integer between 1 and 10. Sets the dimension of the syscall ring buffers
-
-Default value: `4`
 
 ##### <a name="-falco--outputs_rate"></a>`outputs_rate`
 
@@ -392,13 +359,23 @@ Default value:
   }
 ```
 
+##### <a name="-falco--driver"></a>`driver`
+
+Data type: `Enum['bpf', 'modern-bpf', 'kmod']`
+
+The desired Falco driver.
+Can be one of "bpf", "modern-bpf", "kmod".
+Defaults to "kmod"
+
+Default value: `'kmod'`
+
 ##### <a name="-falco--package_ensure"></a>`package_ensure`
 
 Data type: `String[1]`
 
 A string to be passed to the package resource's ensure parameter
 
-Default value: `'installed'`
+Default value: `'>= 0.34'`
 
 ##### <a name="-falco--service_ensure"></a>`service_ensure`
 
@@ -424,6 +401,14 @@ Does the service support restarting?
 
 Default value: `true`
 
+##### <a name="-falco--auto_ruleset_updates"></a>`auto_ruleset_updates`
+
+Data type: `Boolean`
+
+Enable automatic rule updates?
+
+Default value: `true`
+
 ### <a name="falco--config"></a>`falco::config`
 
 Controls the contents of falco.yaml and sets up log rotate, if needed
@@ -438,4 +423,4 @@ Manages the repository falco is installed from
 
 ### <a name="falco--service"></a>`falco::service`
 
-Controls the state of the falco service
+Controls the state of the falco and falcoctl services

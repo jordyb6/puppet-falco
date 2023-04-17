@@ -1,6 +1,0 @@
-<% |
-  String $environment,
-| -%>
-
-[Service]
-Environment=<%= $environment%>
