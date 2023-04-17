@@ -19,19 +19,4 @@ class falco::config inherits falco {
       content => epp('falco/falco_rules.local.yaml.epp', { 'local_rules' => $falco::local_rules, }),
       ;
   }
-
-  $_file_output = $falco::file_output
-
-  if ($_file_output != undef) {
-    logrotate::rule { 'falco_output':
-      path          => $_file_output['filename'],
-      rotate        => 5,
-      rotate_every  => 'day',
-      size          => '1M',
-      missingok     => true,
-      compress      => true,
-      sharedscripts => true,
-      postrotate    => '/usr/bin/killall -USR1 falco',
-    }
-  }
 }
