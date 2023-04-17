@@ -95,6 +95,10 @@
 # @param [Array[Hash]] local_rules
 #   An array of hashes of rules to be added to /etc/falco/falco_rules.local.yaml
 #
+# @param [Boolean] watch_config_files
+#   Whether to do a hot reload upon modification of the config
+#   file or any loaded rule file
+#
 # @param [Boolean] json_output
 #   Whether to output events in json or text
 #
@@ -123,9 +127,16 @@
 #   of "emergency", "alert", "critical", "error", "warning", "notice",
 #   "informational", "debug".
 #
+# @param [Hash] libs_logger
+#   Hash to enable the libs logger sending its log records the same outputs
+#   supported by falco (stderr and syslog).
+#
 # @param [Boolean] buffered_outputs
 #   Whether or not output to any of the output channels below is
 #   buffered. Defaults to false
+#
+# @param [Integer] syscall_buf_size_preset
+#   Integer between 1 and 10. Sets the dimension of the syscall ring buffers.
 #
 # @param [Integer] outputs_rate
 #   The number of tokens (i.e. right to send a notification) gained per second.
@@ -197,6 +208,7 @@ class falco (
     '/etc/falco/rules.d',
   ],
   Array[Hash] $local_rules = [],
+  Boolean $watch_config_files = true,
   Boolean $json_output = false,
   Boolean $json_include_output_property = true,
 
@@ -204,8 +216,13 @@ class falco (
   Boolean $log_syslog = true,
   Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level = 'info',
   Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug'] $priority = 'debug',
+  Hash $libs_logger = {
+    'enabled'   => false,
+    'severity'  => 'debug',
+  },
 
   Boolean $buffered_outputs = false,
+  Integer $syscall_buf_size_preset = 4,
   Integer $outputs_rate = 1,
   Integer $outputs_max_burst = 1000,
 
