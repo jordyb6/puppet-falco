@@ -3,7 +3,7 @@
 # Manages the repository falco is installed from
 #
 class falco::repo inherits falco {
-  if falco::manage_repo {
+  if $falco::manage_repo {
     case $facts['os']['family'] {
       'Debian': {
         include apt
