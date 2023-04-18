@@ -9,7 +9,7 @@ class falco::install inherits falco {
 
   # Install driver dependencies
   # Dependencies are not required for modern-bpf driver
-  unless $falco::driver == 'modern-bpf' and $falco::build_driver != true {
+  unless $falco::driver == 'modern-bpf' or $falco::build_driver != true {
     $_suse_kernel_version_sans_default = regsubst($facts['kernelrelease'], '^(.*)-default$', '\\1')
     $_running_kernel_devel_package = $facts['os']['family'] ? {
       'Debian' => "linux-headers-${facts['kernelrelease']}",
