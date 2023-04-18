@@ -47,18 +47,22 @@ class falco::install inherits falco {
     }
 
     case $_driver_type {
-      'kmod': {
+      'module': {
         exec { "falco-driver-loader ${_driver_type} --compile":
           creates   => $_kernel_mod_path,
           path      => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
+          logoutput => true,
           subscribe => Package[$_running_kernel_devel_package, 'falco'],
           notify    => Service["falco-${falco::driver}"],
         }
       }
       'bpf': {
+        $osname_downcase = downcase($::operatingsystem)
         exec { "falco-driver-loader ${_driver_type} --compile":
+          creates     => "/root/.falco/4.0.0+driver/${facts['os']['architecture']}/falco_${osname_downcase}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
           environment => ['HOME=/root'],
           path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
+          logoutput   => true,
           subscribe   => Package[$_running_kernel_devel_package, 'falco'],
           notify      => Service["falco-${falco::driver}"],
         }
