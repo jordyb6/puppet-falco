@@ -57,9 +57,8 @@ class falco::install inherits falco {
         }
       }
       'bpf': {
-        $osname_downcase = downcase($::operatingsystem)
         exec { "falco-driver-loader ${_driver_type} --compile":
-          creates     => "/root/.falco/4.0.0+driver/${facts['os']['architecture']}/falco_${osname_downcase}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
+          creates     => "/root/.falco/${facts['falco_driver_version']}/${facts['os']['architecture']}/falco_${downcase($::operatingsystem)}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
           environment => ['HOME=/root'],
           path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
           logoutput   => true,
