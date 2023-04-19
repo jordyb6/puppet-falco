@@ -196,10 +196,15 @@
 #    Let the module handle building of the drivers.
 #    Default is true.
 #
+# @param manage_dependencies
+#    Let module handle dependencies for building drivers.
+#    Defaults to true.
+#
 class falco (
   # Configuration parameters
   Boolean $manage_repo = true,
   Boolean $build_driver = true,
+  Boolean $manage_dependencies = true,
 
   Array $rules_file = [
     '/etc/falco/falco_rules.yaml',
