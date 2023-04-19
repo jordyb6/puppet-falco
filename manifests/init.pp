@@ -200,11 +200,15 @@
 #    Let module handle dependencies for building drivers.
 #    Defaults to true.
 #
+# @param falco_driver_loader_option
+#    Extra flags to pass to falco_driver_loader
+#
 class falco (
   # Configuration parameters
   Boolean $manage_repo = true,
   Boolean $build_driver = true,
   Boolean $manage_dependencies = true,
+  String $falco_driver_loader_option = '--compile',
 
   Array $rules_file = [
     '/etc/falco/falco_rules.yaml',

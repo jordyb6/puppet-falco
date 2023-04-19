@@ -19,7 +19,7 @@ class falco::install inherits falco {
     }
     ensure_packages([$_running_kernel_devel_package], { 'before' => Package['falco'] })
 
-    if manage_dependencies {
+    if $falco::manage_dependencies {
       if $falco::driver == 'bpf' {
         $_bpf_package_deps = ['llvm','clang','make']
         ensure_packages($_bpf_package_deps, { 'before' => Package['falco'] })
@@ -50,7 +50,7 @@ class falco::install inherits falco {
 
     case $_driver_type {
       'module': {
-        exec { "falco-driver-loader ${_driver_type} --compile":
+        exec { "falco-driver-loader ${_driver_type} ${falco::falco_driver_loader_option}":
           creates   => $_kernel_mod_path,
           path      => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
           logoutput => true,
@@ -59,7 +59,7 @@ class falco::install inherits falco {
         }
       }
       'bpf': {
-        exec { "falco-driver-loader ${_driver_type} --compile":
+        exec { "falco-driver-loader ${_driver_type} ${falco::falco_driver_loader_option}":
           creates     => "/root/.falco/${facts['falco_driver_version']}/${facts['os']['architecture']}/falco_${downcase($::operatingsystem)}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
           environment => ['HOME=/root'],
           path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
