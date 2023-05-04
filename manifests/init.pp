@@ -201,14 +201,20 @@
 #    Defaults to true.
 #
 # @param falco_driver_loader_option
-#    Extra flags to pass to falco_driver_loader
+#    Extra flags to pass to falco-driver-loader
+#
+# @param falco_driver_loader_env
+#    Pass environment variables when running falco-driver-loader
 #
 class falco (
   # Configuration parameters
   Boolean $manage_repo = true,
   Boolean $build_driver = true,
   Boolean $manage_dependencies = true,
-  String $falco_driver_loader_option = '--compile',
+  String  $falco_driver_loader_option = '--compile',
+  Array   $falco_driver_loader_env = [
+    'HOME=/root',
+  ],
 
   Array $rules_file = [
     '/etc/falco/falco_rules.yaml',
