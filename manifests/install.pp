@@ -63,7 +63,6 @@ class falco::install inherits falco {
           creates     => "/root/.falco/${facts['falco_driver_version']}/${facts['os']['architecture']}/falco_${downcase($::operatingsystem)}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
           environment => $falco::falco_driver_loader_env,
           path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
-          logoutput   => true,
           subscribe   => Package[$_running_kernel_devel_package, 'falco'],
           notify      => Service["falco-${falco::driver}"],
         }
