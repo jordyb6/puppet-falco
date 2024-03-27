@@ -3,7 +3,7 @@
 # Controls the state of the falco and falcoctl services
 #
 class falco::service inherits falco {
-  service { "falco-${falco::driver}":
+  service { "falco-${falco::service_name}":
     ensure     => $falco::service_ensure,
     enable     => $falco::service_enable,
     hasstatus  => true,

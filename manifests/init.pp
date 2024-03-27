@@ -255,6 +255,13 @@ class falco (
   Boolean $auto_ruleset_updates = true,
   Boolean $manage_dependencies = true,
 ) {
+  $service_name = $falco::engine_kind ? {
+    'kmod'        => 'kmod',
+    'ebpf'        => 'bpf',
+    'modern_ebpf' => 'modern-bpf',
+    default => fail(" Service \"falco-${falco::engine_kind}\" is not yet supported by either the module \"${module_name}\" or \"falco\""),
+  }
+
   Class['falco::repo']
   -> Class['falco::install']
   -> Class['falco::config']

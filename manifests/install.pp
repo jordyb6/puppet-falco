@@ -50,7 +50,7 @@ class falco::install inherits falco {
           creates   => $_kernel_mod_path,
           path      => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
           subscribe => Package[$_running_kernel_devel_package, 'falco'],
-          notify    => Service["falco-${falco::driver}"],
+          notify    => Service["falco-${falco::service_name}"],
         }
       }
       'bpf': {
@@ -59,7 +59,7 @@ class falco::install inherits falco {
           environment => ['HOME=/root'],
           path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
           subscribe   => Package[$_running_kernel_devel_package, 'falco'],
-          notify      => Service["falco-${falco::driver}"],
+          notify      => Service["falco-${falco::service_name}"],
         }
       }
       default: {
