@@ -7,6 +7,15 @@ class falco::install inherits falco {
     ensure => $falco::package_ensure,
   }
 
+  file { '/etc/falcoctl/falcoctl.yaml':
+    ensure    => file,
+    owner     => 'root',
+    group     => 'root',
+    mode      => '0644',
+    content   => epp('falco/falcoctl.yaml.epp'),
+    subscribe => Package['falco'],
+  }
+
   # Install driver dependencies
   # Dependencies are not required for modern-bpf driver
   unless $falco::engine_kind == 'modern-bpf' {

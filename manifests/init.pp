@@ -166,6 +166,10 @@
 #  Can be one of "ebpf", "modern_bpf", "kmod".
 #  Defaults to "kmod"
 #
+# @param falcoctl_driver_config
+#    A hash to configure the falcoctl driver tool
+#    See the template for available keys.
+#
 # @param package_ensure
 #   A string to be passed to the package resource's ensure parameter
 #
@@ -242,6 +246,15 @@ class falco (
   },
 
   Enum['bpf', 'modern-bpf', 'kmod'] $engine_kind = 'kmod',
+
+  # Parameters for falcoctl config file
+  Hash $falcoctl_driver_config = {
+    'type'     => 'kmod',
+    'name'     => 'falco',
+    'repos'    => ['https://download.falco.org/driver'],
+    'version'  => '7.0.0+driver',
+    'hostroot' => '/',
+  },
 
   Boolean $manage_repo = true,
 
