@@ -9,7 +9,7 @@ class falco::install inherits falco {
 
   # Install driver dependencies
   # Dependencies are not required for modern-bpf driver
-  unless $falco::driver == 'modern-bpf' {
+  unless $falco::engine_kind == 'modern-bpf' {
     $_suse_kernel_version_sans_default = regsubst($facts['kernelrelease'], '^(.*)-default$', '\\1')
     $_running_kernel_devel_package = $facts['os']['family'] ? {
       'Debian' => "linux-headers-${facts['kernelrelease']}",
@@ -26,10 +26,10 @@ class falco::install inherits falco {
       ensure_packages($_bpf_package_deps, { 'before' => Package['falco'] })
     }
 
-    $_driver_type = $falco::driver ? {
+    $_driver_type = $falco::engine_kind ? {
       'kmod'  => 'module',
-      'bpf'   => 'bpf',
-      default => fail("The drvier \"${falco::driver}\" is not yet supported by either the module \"${module_name}\" or \"falco-driver-loader\""), # lint:ignore:140chars
+      'ebpf'   => 'bpf',
+      default => fail("The driver \"${falco::engine_kind}\" is not yet supported by either the module \"${module_name}\" or \"falco-driver-loader\""), # lint:ignore:140chars
     }
 
     # Download and compile the desired falco driver based on the currently running kernel version.

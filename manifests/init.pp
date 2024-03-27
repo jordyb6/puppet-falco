@@ -161,9 +161,9 @@
 #   A hash to configure the http output.
 #   See the template for available keys.
 #
-# @param driver
+# @param engine_kind
 #  The desired Falco driver.
-#  Can be one of "bpf", "modern-bpf", "kmod".
+#  Can be one of "ebpf", "modern_bpf", "kmod".
 #  Defaults to "kmod"
 #
 # @param package_ensure
@@ -241,7 +241,7 @@ class falco (
     'user_agent' => '"falcosecurity/falco"',
   },
 
-  Enum['bpf', 'modern-bpf', 'kmod'] $driver = 'kmod',
+  Enum['bpf', 'modern-bpf', 'kmod'] $engine_kind = 'kmod',
 
   Boolean $manage_repo = true,
 
