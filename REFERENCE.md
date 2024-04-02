@@ -133,7 +133,10 @@ The following parameters are available in the `falco` class:
 * [`webserver`](#-falco--webserver)
 * [`program_output`](#-falco--program_output)
 * [`http_output`](#-falco--http_output)
-* [`driver`](#-falco--driver)
+* [`engine_kind`](#-falco--engine_kind)
+* [`falcoctl_driver_config`](#-falco--falcoctl_driver_config)
+* [`falcoctl_install_options`](#-falco--falcoctl_install_options)
+* [`falcoctl_install_env`](#-falco--falcoctl_install_env)
 * [`package_ensure`](#-falco--package_ensure)
 * [`service_ensure`](#-falco--service_ensure)
 * [`service_enable`](#-falco--service_enable)
@@ -371,15 +374,57 @@ Default value:
   }
 ```
 
-##### <a name="-falco--driver"></a>`driver`
+##### <a name="-falco--engine_kind"></a>`engine_kind`
 
-Data type: `Enum['bpf', 'modern-bpf', 'kmod']`
+Data type: `Enum['ebpf', 'modern_bpf', 'kmod']`
 
 The desired Falco driver.
-Can be one of "bpf", "modern-bpf", "kmod".
+Can be one of "ebpf", "modern_bpf", "kmod".
 Defaults to "kmod"
 
 Default value: `'kmod'`
+
+##### <a name="-falco--falcoctl_driver_config"></a>`falcoctl_driver_config`
+
+Data type: `Hash`
+
+A hash to configure the falcoctl driver tool
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'type'     => 'kmod',
+    'name'     => 'falco',
+    'repos'    => ['https://download.falco.org/driver'],
+    'version'  => '7.0.0+driver',
+    'hostroot' => '/',
+  }
+```
+
+##### <a name="-falco--falcoctl_install_options"></a>`falcoctl_install_options`
+
+Data type: `Array`
+
+Extra flags to pass to falco-driver-loader
+
+Default value:
+
+```puppet
+[
+    '--compile=true',
+    '--download=true',
+  ]
+```
+
+##### <a name="-falco--falcoctl_install_env"></a>`falcoctl_install_env`
+
+Data type: `Array`
+
+Pass environment variables when running falco-driver-loader
+
+Default value: `[]`
 
 ##### <a name="-falco--package_ensure"></a>`package_ensure`
 
