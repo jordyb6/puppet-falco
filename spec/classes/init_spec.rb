@@ -50,7 +50,7 @@ describe 'falco' do
         end
 
         it { is_expected.to contain_class('falco::install') }
-        it { is_expected.to contain_exec('falco-driver-loader module --compile') }
+        it { is_expected.to contain_exec('falcoctl driver install --compile=true --download=true') }
         it { is_expected.to contain_package('falco') }
 
         it { is_expected.to contain_class('falco::config') }
@@ -65,6 +65,11 @@ describe 'falco' do
             with_content(%r{# Or override/append to any rule, macro, or list from the Default Rules\n\n$})
         }
 
+        it {
+          is_expected.to contain_file('/etc/falcoctl/falcoctl.yaml').
+            with_content(%r{    hostroot: /$})
+        }
+
         it { is_expected.to contain_class('falco::service') }
         it { is_expected.to contain_service('falco-kmod') }
       end
@@ -72,34 +77,31 @@ describe 'falco' do
       context 'with bpf driver' do
         let(:facts) do
           facts.merge(
-            { falco_driver_version: '5.0.1+driver' }
+            { falco_driver_version: '7.0.0+driver' }
           )
         end
-        let(:driver) { 'bpf' }
+        let(:engine_kind) { 'ebpf' }
         let(:params) do
           {
-            'driver' => driver
+            'engine_kind' => engine_kind
           }
         end
-
-        it {
-          is_expected.to contain_exec("falco-driver-loader #{driver} --compile").with(
-            { creates: "/root/.falco/5.0.1+driver/#{facts[:architecture]}/falco_#{facts[:operatingsystem].downcase}_#{facts[:kernelrelease]}_1.o" }
-          )
-        }
-
-        it { is_expected.to contain_service("falco-#{driver}") }
+        it { is_expected.to contain_exec('falcoctl driver install --compile=true --download=true').with(
+          { creates: "/root/.falco/7.0.0+driver/#{facts[:architecture]}/falco_#{facts[:operatingsystem].downcase}_#{facts[:kernelrelease]}_1.o" }
+        )
+       }
+        it { is_expected.to contain_service('falco-bpf') }
       end
 
       context 'with modern-bpf driver' do
-        let(:driver) { 'modern-bpf' }
+        let(:engine_kind) { 'modern_bpf' }
         let(:params) do
           {
-            'driver' => driver
+            'engine_kind' => engine_kind
           }
         end
 
-        it { is_expected.not_to contain_exec("falco-driver-loader #{driver} --compile") }
+        it { is_expected.not_to contain_exec('falcoctl driver install --compile=true --download=true') }
 
         case facts[:os]['family']
         when 'Debian'
@@ -110,7 +112,7 @@ describe 'falco' do
           it { is_expected.not_to contain_package("kernel-default-devel-#{facts[:kernelversion]}-#{suse_kernel_patch_level}") }
         end
 
-        it { is_expected.to contain_service("falco-#{driver}") }
+        it { is_expected.to contain_service('falco-modern-bpf') }
       end
 
       context 'with auto_ruleset_updates disabled' do
