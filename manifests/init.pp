@@ -170,6 +170,12 @@
 #    A hash to configure the falcoctl driver tool
 #    See the template for available keys.
 #
+# @param falcoctl_install_options
+#    Extra flags to pass to falco-driver-loader
+#
+# @param falcoctl_install_env
+#    Pass environment variables when running falco-driver-loader
+#
 # @param package_ensure
 #   A string to be passed to the package resource's ensure parameter
 #
@@ -247,7 +253,7 @@ class falco (
 
   Enum['bpf', 'modern-bpf', 'kmod'] $engine_kind = 'kmod',
 
-  # Parameters for falcoctl config file
+  # Parameters for falcoctl command
   Hash $falcoctl_driver_config = {
     'type'     => 'kmod',
     'name'     => 'falco',
@@ -255,6 +261,11 @@ class falco (
     'version'  => '7.0.0+driver',
     'hostroot' => '/',
   },
+  Array $falcoctl_install_options = [
+    '--compile=true',
+    '--download=true',
+  ],
+  Array $falcoctl_install_env = [],
 
   Boolean $manage_repo = true,
 

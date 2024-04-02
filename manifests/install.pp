@@ -53,27 +53,20 @@ class falco::install inherits falco {
       default  => fail("The module \"${module_name}\" does not yet support \"${facts['os']['family']}\""),
     }
 
-    case $_driver_type {
-      'module': {
-        exec { "falco-driver-loader ${_driver_type} --compile":
-          creates   => $_kernel_mod_path,
-          path      => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
-          subscribe => Package[$_running_kernel_devel_package, 'falco'],
-          notify    => Service["falco-${falco::service_name}"],
-        }
-      }
-      'bpf': {
-        exec { "falco-driver-loader ${_driver_type} --compile":
-          creates     => "/root/.falco/${facts['falco_driver_version']}/${facts['os']['architecture']}/falco_${downcase($facts['os']['name'])}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
-          environment => ['HOME=/root'],
-          path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
-          subscribe   => Package[$_running_kernel_devel_package, 'falco'],
-          notify      => Service["falco-${falco::service_name}"],
-        }
-      }
-      default: {
-        fail("The driver \"${_driver_type}\" is not yet supported by either the module \"${module_name}\" or \"falco-driver-loader\"") # lint:ignore:140chars
-      }
+    $_driver_path = $_driver_type ? {
+      'module' => $_kernel_mod_path,
+      'bpf'    => "/root/.falco/${falco::falcoctl_driver_config['version']}/${facts['os']['architecture']}/falco_${downcase($facts['os']['name'])}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
+    }
+
+    exec { "falcoctl driver install ${falco::falcoctl_install_options.join(' ')}":
+      creates     => $_driver_path,
+      environment => $falco::falcoctl_install_env,
+      path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
+      subscribe   => [
+        Package[$_running_kernel_devel_package, 'falco'],
+        File['/etc/falcoctl/falcoctl.yaml'],
+      ],
+      notify      => Service["falco-${falco::service_name}"],
     }
   }
 }
