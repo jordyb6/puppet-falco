@@ -201,54 +201,101 @@
 #
 class falco (
   # Configuration parameters
-  Array $rules_file = [
+  Array[Stdlib::Absolutepath] $rules_file = [
     '/etc/falco/falco_rules.yaml',
     '/etc/falco/falco_rules.local.yaml',
     '/etc/falco/k8s_audit_rules.yaml',
     '/etc/falco/rules.d',
   ],
   Array[Hash] $local_rules = [],
+  Hash $engine_options = {
+    'buf_size_preset' => 4,
+    'drop_failed_exit' => false,
+    'probe' => "\${HOME}/.falco/falco-bpf.o",
+  },
+  Optional[Array[String]] $load_plugins = undef,
+  Optional[Array[Hash]] $plugins = undef,
   Boolean $watch_config_files = true,
+  Boolean $time_format_iso_8601 = false,
+  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $priority = 'debug',
   Boolean $json_output = false,
   Boolean $json_include_output_property = true,
-
-  Boolean $log_stderr = true,
-  Boolean $log_syslog = true,
-  Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level = 'info',
-  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug'] $priority = 'debug',
-
+  Boolean $json_include_tags_property = true,
   Boolean $buffered_outputs = false,
-  Integer $outputs_rate = 1,
-  Integer $outputs_max_burst = 1000,
-
-  Hash $syslog_output = {
-    'enabled' => true,
-  },
-  Hash $file_output = {
+  Enum['first', 'all'] $rule_matching = 'first',
+  Integer $outputs_queue_capacity = 0,
+  Boolean $stdout_output = true,
+  Boolean $syslog_output = true,
+  Hash[String, Variant[Boolean, Stdlib::Unixpath]] $file_output = {
     'enabled'    => false,
     'keep_alive' => false,
     'filename'   => '/var/log/falco-events.log',
   },
-  Hash $stdout_output = {
-    'enabled' => true,
+  Hash[String, Variant[Boolean, String]] $http_output = {
+    'enabled'          => false,
+    'url'              => 'http://some.url',
+    'user_agent'       => 'falcosecurity/falco',
+    'insecure'         => false,
+    'ca_cert'          => '',
+    'ca_bundle'        => '',
+    'ca_path'          => '/etc/ssl/certs',
+    'mtls'             => false,
+    'client_cert'      => '/etc/ssl/certs/client.crt',
+    'client_key'       => '/etc/ssl/certs/client.key',
+    'echo'             => false,
+    'compress_uploads' => false,
+    'keep_alive'       => false,
   },
-  Hash $webserver = {
-    'enabled'              => false,
-    'listen_port'          => 8765,
-    'k8s_audit_endpoint'   => '/k8s-audit',
-    'k8s_healthz_endpoint' => '/healthz',
-    'ssl_enabled'          => false,
-    'ssl_certificate'      => '/etc/falco/falco.pem',
-  },
-  Hash $program_output = {
+  Hash[String, Variant[Boolean, String]] $program_output = {
     'enabled'    => false,
     'keep_alive' => false,
-    'program'    => '"jq \'{text: .output}\' | curl -d @- -X POST https://hooks.slack.com/services/XXX"',
+    'program'    => "jq '{text: .output}' | curl -d @- -X POST https://hooks.slack.com/services/XXX",
   },
-  Hash $http_output = {
-    'enabled'    => false,
-    'url'        => 'http://some.url',
-    'user_agent' => '"falcosecurity/falco"',
+  Boolean $grpc_output = false,
+  Hash[String, Variant[Integer, Boolean, String]] $grpc = {
+    'enabled'      => false,
+    'bind_address' => 'unix:///run/falco/falco.sock',
+    'threadiness'  => 0,
+  },
+  Hash[String, Variant[Boolean, Integer, Stdlib::Unixpath, Stdlib::IP::Address]] $webserver = {
+    'enabled' => true,
+    'threadiness' => 0,
+    'listen_port' => 8765,
+    'listen_address' => '0.0.0.0',
+    'k8s_healthz_endpoint' => '/healthz',
+    'ssl_enabled' => false,
+    'ssl_certificate' => '/etc/falco/falco.pem',
+  },
+  Boolean $log_stderr = true,
+  Boolean $log_syslog = true,
+  Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $log_level = 'info',
+  Hash[String, Variant[Boolean, String]] $libs_logger = {
+    'enabled' => false,
+    'severity' => 'debug',
+  },
+  Integer $output_timeout = 2000,
+  Integer $syscall_event_timeouts_max_consecutives = 1000,
+  Hash[String, Variant[Array, String, Integer, Boolean]] $syscall_event_drops = {
+    'threshold' => '.1',
+    'actions' => ['log', 'alert'],
+    'rate' => '.03333',
+    'max_burst' => 1,
+    'simulate_drops' => false,
+  },
+  Hash[String, Variant[Boolean, String]] $metrics = {
+    'enabled' => false,
+    'interval' => '1h',
+    'output_rule' => true,
+    'resource_utilization_enabled' => true,
+    'state_counters_enabled' => true,
+    'kernel_event_counters_enabled' => true,
+    'libbpf_stats_enabled' => true,
+    'convert_memory_to_mb' => true,
+    'include_empty_values' => false,
+  },
+  Hash[String, Variant[Array[String], Boolean]] $base_syscalls = {
+    'custom_set' => [],
+    'repair' => false,
   },
 
   Enum['ebpf', 'modern_bpf', 'kmod'] $engine_kind = 'kmod',
