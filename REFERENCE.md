@@ -35,8 +35,8 @@ include falco
 ```puppet
 class { 'falco':
   file_output => {
-    'enabled'    => 'true',
-    'keep_alive' => 'false',
+    'enabled'    => true,
+    'keep_alive' => false,
     'filename'   => '/var/log/falco-events.log',
   },
 }
@@ -128,6 +128,7 @@ The following parameters are available in the `falco` class:
 * [`buffered_outputs`](#-falco--buffered_outputs)
 * [`syslog_output`](#-falco--syslog_output)
 * [`file_output`](#-falco--file_output)
+* [`enable_logrotate`](#-falco--enable_logrotate)
 * [`stdout_output`](#-falco--stdout_output)
 * [`webserver`](#-falco--webserver)
 * [`program_output`](#-falco--program_output)
@@ -306,11 +307,19 @@ Default value:
 
 ```puppet
 {
-    'enabled'    => false,
+    'enabled'    => true,
     'keep_alive' => false,
     'filename'   => '/var/log/falco-events.log',
   }
 ```
+
+##### <a name="-falco--enable_logrotate"></a>`enable_logrotate`
+
+Data type: `Boolean`
+
+Wether or not to use logrotate.
+
+Default value: `true`
 
 ##### <a name="-falco--stdout_output"></a>`stdout_output`
 
@@ -568,7 +577,7 @@ Default value:
 
 ##### <a name="-falco--engine_kind"></a>`engine_kind`
 
-Data type: `Enum['ebpf', 'modern_bpf', 'kmod']`
+Data type: `Enum['ebpf', 'modern_ebpf', 'kmod']`
 
 The desired Falco driver.
 Can be one of "ebpf", "modern_bpf", "kmod".

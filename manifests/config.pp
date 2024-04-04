@@ -20,9 +20,10 @@ class falco::config inherits falco {
       ;
   }
 
-  $_file_output = $falco::file_output
+  $_enable_logrotate = $falco::enable_logrotate
+  $_file_output      = $falco::file_output
 
-  if ($_file_output != undef) and ($_file_output['enabled']) {
+  if ($_file_output != undef) and ($_file_output['enabled'] and $_enable_logrotate) {
     logrotate::rule { 'falco_output':
       path          => $_file_output['filename'],
       rotate        => 5,

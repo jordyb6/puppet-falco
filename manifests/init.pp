@@ -12,8 +12,8 @@
 # @example Enabling file output
 #   class { 'falco':
 #     file_output => {
-#       'enabled'    => 'true',
-#       'keep_alive' => 'false',
+#       'enabled'    => true,
+#       'keep_alive' => false,
 #       'filename'   => '/var/log/falco-events.log',
 #     },
 #   }
@@ -142,6 +142,9 @@
 # @param file_output
 #   A hash to configure the file output.
 #   See the template for available keys.
+#
+# @param enable_logrotate
+#   Wether or not to use logrotate.
 #
 # @param stdout_output
 #   A hash to configure the stdout output.
@@ -288,10 +291,11 @@ class falco (
   Boolean $stdout_output = true,
   Boolean $syslog_output = true,
   Hash[String, Variant[Boolean, Stdlib::Unixpath]] $file_output = {
-    'enabled'    => false,
+    'enabled'    => true,
     'keep_alive' => false,
     'filename'   => '/var/log/falco-events.log',
   },
+  Boolean $enable_logrotate = true,
   Hash[String, Variant[Boolean, String]] $http_output = {
     'enabled'          => false,
     'url'              => 'http://some.url',
@@ -388,9 +392,9 @@ class falco (
   Boolean $manage_dependencies = true,
 ) {
   $service_name = $falco::engine_kind ? {
-    'kmod'         => 'kmod',
-    'ebpf'         => 'bpf',
-    'modern_ebpf'  => 'modern-bpf',
+    'kmod'        => 'kmod',
+    'ebpf'        => 'bpf',
+    'modern_ebpf' => 'modern-bpf',
     default => fail(" Service \"falco-${falco::engine_kind}\" is not yet supported by either the module \"${module_name}\" or \"falco\""),
   }
 
