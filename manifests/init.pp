@@ -317,7 +317,7 @@ class falco (
   Boolean $manage_repo = true,
 
   # Installation parameters
-  String[1] $package_ensure = '>= 0.34',
+  String[1] $package_ensure = '>= 0.37.1',
 
   # Service parameters
   Variant[Boolean, Enum['running', 'stopped']] $service_ensure = 'running',
