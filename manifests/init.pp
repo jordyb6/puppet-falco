@@ -211,7 +211,6 @@ class falco (
   Hash $engine_options = {
     'buf_size_preset' => 4,
     'drop_failed_exit' => false,
-    'probe' => "\${HOME}/.falco/falco-bpf.o",
   },
   Optional[Array[String]] $load_plugins = undef,
   Optional[Array[Hash]] $plugins = undef,
