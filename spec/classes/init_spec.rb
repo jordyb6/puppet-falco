@@ -50,7 +50,7 @@ describe 'falco' do
         end
 
         it { is_expected.to contain_class('falco::install') }
-        it { is_expected.to contain_exec('falcoctl driver install --compile=true --download=true') }
+        it { is_expected.to contain_exec('falcoctl driver install --compile=true --download=false') }
         it { is_expected.to contain_package('falco') }
 
         it { is_expected.to contain_class('falco::config') }
@@ -86,7 +86,7 @@ describe 'falco' do
             'engine_kind' => engine_kind
           }
         end
-        it { is_expected.to contain_exec('falcoctl driver install --compile=true --download=true').with(
+        it { is_expected.to contain_exec('falcoctl driver install --compile=true --download=false').with(
           { creates: "/root/.falco/7.0.0+driver/#{facts[:architecture]}/falco_#{facts[:operatingsystem].downcase}_#{facts[:kernelrelease]}_1.o" }
         )
        }
@@ -101,7 +101,7 @@ describe 'falco' do
           }
         end
 
-        it { is_expected.not_to contain_exec('falcoctl driver install --compile=true --download=true') }
+        it { is_expected.not_to contain_exec('falcoctl driver install --compile=true --download=false') }
 
         case facts[:os]['family']
         when 'Debian'

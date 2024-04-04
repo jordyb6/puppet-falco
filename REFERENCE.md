@@ -414,7 +414,7 @@ Default value:
 ```puppet
 [
     '--compile=true',
-    '--download=true',
+    '--download=false',
   ]
 ```
 
