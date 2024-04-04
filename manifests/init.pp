@@ -310,7 +310,7 @@ class falco (
   },
   Array $falcoctl_install_options = [
     '--compile=true',
-    '--download=true',
+    '--download=false',
   ],
   Array $falcoctl_install_env = [],
 
