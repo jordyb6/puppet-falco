@@ -117,31 +117,50 @@ The following parameters are available in the `falco` class:
 
 * [`rules_file`](#-falco--rules_file)
 * [`local_rules`](#-falco--local_rules)
+* [`watch_config_files`](#-falco--watch_config_files)
 * [`json_output`](#-falco--json_output)
 * [`json_include_output_property`](#-falco--json_include_output_property)
 * [`log_stderr`](#-falco--log_stderr)
 * [`log_syslog`](#-falco--log_syslog)
 * [`log_level`](#-falco--log_level)
+* [`libs_logger`](#-falco--libs_logger)
 * [`priority`](#-falco--priority)
 * [`buffered_outputs`](#-falco--buffered_outputs)
-* [`outputs_rate`](#-falco--outputs_rate)
-* [`outputs_max_burst`](#-falco--outputs_max_burst)
 * [`syslog_output`](#-falco--syslog_output)
 * [`file_output`](#-falco--file_output)
 * [`stdout_output`](#-falco--stdout_output)
 * [`webserver`](#-falco--webserver)
 * [`program_output`](#-falco--program_output)
 * [`http_output`](#-falco--http_output)
-* [`driver`](#-falco--driver)
+* [`engine_options`](#-falco--engine_options)
+* [`load_plugins`](#-falco--load_plugins)
+* [`plugins`](#-falco--plugins)
+* [`time_format_iso_8601`](#-falco--time_format_iso_8601)
+* [`json_include_tags_property`](#-falco--json_include_tags_property)
+* [`rule_matching`](#-falco--rule_matching)
+* [`outputs_queue_capacity`](#-falco--outputs_queue_capacity)
+* [`grpc_output`](#-falco--grpc_output)
+* [`grpc`](#-falco--grpc)
+* [`output_timeout`](#-falco--output_timeout)
+* [`syscall_event_timeouts_max_consecutives`](#-falco--syscall_event_timeouts_max_consecutives)
+* [`syscall_event_drops`](#-falco--syscall_event_drops)
+* [`metrics`](#-falco--metrics)
+* [`base_syscalls`](#-falco--base_syscalls)
+* [`engine_kind`](#-falco--engine_kind)
+* [`falcoctl_driver_config`](#-falco--falcoctl_driver_config)
+* [`falcoctl_install_options`](#-falco--falcoctl_install_options)
+* [`falcoctl_install_env`](#-falco--falcoctl_install_env)
 * [`package_ensure`](#-falco--package_ensure)
 * [`service_ensure`](#-falco--service_ensure)
 * [`service_enable`](#-falco--service_enable)
 * [`service_restart`](#-falco--service_restart)
 * [`auto_ruleset_updates`](#-falco--auto_ruleset_updates)
+* [`manage_dependencies`](#-falco--manage_dependencies)
+* [`manage_repo`](#-falco--manage_repo)
 
 ##### <a name="-falco--rules_file"></a>`rules_file`
 
-Data type: `Array`
+Data type: `Array[Stdlib::Absolutepath]`
 
 File(s) or Directories containing Falco rules, loaded at startup.
 The name "rules_file" is only for backwards compatibility.
@@ -174,6 +193,15 @@ Data type: `Array[Hash]`
 An array of hashes of rules to be added to /etc/falco/falco_rules.local.yaml
 
 Default value: `[]`
+
+##### <a name="-falco--watch_config_files"></a>`watch_config_files`
+
+Data type: `Boolean`
+
+Whether to do a hot reload upon modification of the config
+file or any loaded rule file
+
+Default value: `true`
 
 ##### <a name="-falco--json_output"></a>`json_output`
 
@@ -213,7 +241,7 @@ Default value: `true`
 
 ##### <a name="-falco--log_level"></a>`log_level`
 
-Data type: `Enum['alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug']`
+Data type: `Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug']`
 
 Minimum log level to include in logs. Note: these levels are
 separate from the priority field of rules. This refers only to the
@@ -222,9 +250,25 @@ log level of falco's internal logging. Can be one of "emergency",
 
 Default value: `'info'`
 
+##### <a name="-falco--libs_logger"></a>`libs_logger`
+
+Data type: `Hash[String, Variant[Boolean, String]]`
+
+Hash to enable the libs logger sending its log records the same outputs
+supported by falco (stderr and syslog).
+
+Default value:
+
+```puppet
+{
+    'enabled' => false,
+    'severity' => 'debug',
+  }
+```
+
 ##### <a name="-falco--priority"></a>`priority`
 
-Data type: `Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'informational', 'debug']`
+Data type: `Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug']`
 
 Minimum rule priority level to load and run. All rules having a
 priority more severe than this level will be loaded/run.  Can be one
@@ -242,40 +286,18 @@ buffered. Defaults to false
 
 Default value: `false`
 
-##### <a name="-falco--outputs_rate"></a>`outputs_rate`
-
-Data type: `Integer`
-
-The number of tokens (i.e. right to send a notification) gained per second.
-
-Default value: `1`
-
-##### <a name="-falco--outputs_max_burst"></a>`outputs_max_burst`
-
-Data type: `Integer`
-
-The maximum number of tokens outstanding.
-
-Default value: `1000`
-
 ##### <a name="-falco--syslog_output"></a>`syslog_output`
 
-Data type: `Hash`
+Data type: `Boolean`
 
 A hash to configure the syslog output.
 See the template for available keys.
 
-Default value:
-
-```puppet
-{
-    'enabled' => true,
-  }
-```
+Default value: `true`
 
 ##### <a name="-falco--file_output"></a>`file_output`
 
-Data type: `Hash`
+Data type: `Hash[String, Variant[Boolean, Stdlib::Unixpath]]`
 
 A hash to configure the file output.
 See the template for available keys.
@@ -292,22 +314,16 @@ Default value:
 
 ##### <a name="-falco--stdout_output"></a>`stdout_output`
 
-Data type: `Hash`
+Data type: `Boolean`
 
 A hash to configure the stdout output.
 See the template for available keys.
 
-Default value:
-
-```puppet
-{
-    'enabled' => true,
-  }
-```
+Default value: `true`
 
 ##### <a name="-falco--webserver"></a>`webserver`
 
-Data type: `Hash`
+Data type: `Hash[String, Variant[Boolean, Integer, Stdlib::Unixpath, Stdlib::IP::Address]]`
 
 A has to configure the webserver.
 See the template for available keys.
@@ -316,18 +332,19 @@ Default value:
 
 ```puppet
 {
-    'enabled'              => false,
-    'listen_port'          => 8765,
-    'k8s_audit_endpoint'   => '/k8s-audit',
+    'enabled' => true,
+    'threadiness' => 0,
+    'listen_port' => 8765,
+    'listen_address' => '0.0.0.0',
     'k8s_healthz_endpoint' => '/healthz',
-    'ssl_enabled'          => false,
-    'ssl_certificate'      => '/etc/falco/falco.pem',
+    'ssl_enabled' => false,
+    'ssl_certificate' => '/etc/falco/falco.pem',
   }
 ```
 
 ##### <a name="-falco--program_output"></a>`program_output`
 
-Data type: `Hash`
+Data type: `Hash[String, Variant[Boolean, String]]`
 
 A hash to configure the program output.
 See the template for available keys.
@@ -338,13 +355,13 @@ Default value:
 {
     'enabled'    => false,
     'keep_alive' => false,
-    'program'    => '"jq \'{text: .output}\' | curl -d @- -X POST https://hooks.slack.com/services/XXX"',
+    'program'    => "jq '{text: .output}' | curl -d @- -X POST https://hooks.slack.com/services/XXX",
   }
 ```
 
 ##### <a name="-falco--http_output"></a>`http_output`
 
-Data type: `Hash`
+Data type: `Hash[String, Variant[Boolean, String]]`
 
 A hash to configure the http output.
 See the template for available keys.
@@ -353,21 +370,253 @@ Default value:
 
 ```puppet
 {
-    'enabled'    => false,
-    'url'        => 'http://some.url',
-    'user_agent' => '"falcosecurity/falco"',
+    'enabled'          => false,
+    'url'              => 'http://some.url',
+    'user_agent'       => 'falcosecurity/falco',
+    'insecure'         => false,
+    'ca_cert'          => '',
+    'ca_bundle'        => '',
+    'ca_path'          => '/etc/ssl/certs',
+    'mtls'             => false,
+    'client_cert'      => '/etc/ssl/certs/client.crt',
+    'client_key'       => '/etc/ssl/certs/client.key',
+    'echo'             => false,
+    'compress_uploads' => false,
+    'keep_alive'       => false,
   }
 ```
 
-##### <a name="-falco--driver"></a>`driver`
+##### <a name="-falco--engine_options"></a>`engine_options`
 
-Data type: `Enum['bpf', 'modern-bpf', 'kmod']`
+Data type: `Hash`
+
+A hash to configure engine options.
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'buf_size_preset' => 4,
+    'drop_failed_exit' => false,
+  }
+```
+
+##### <a name="-falco--load_plugins"></a>`load_plugins`
+
+Data type: `Optional[Array[String]]`
+
+An array to specify which plugins to load.
+
+Default value: `undef`
+
+##### <a name="-falco--plugins"></a>`plugins`
+
+Data type: `Optional[Array[Hash]]`
+
+A hash to specify plugin specific options.
+See the template for available keys.
+
+Default value: `undef`
+
+##### <a name="-falco--time_format_iso_8601"></a>`time_format_iso_8601`
+
+Data type: `Boolean`
+
+When enabled, Falco will display log and output messages with times in the ISO
+8601 format. By default, times are shown in the local time zone determined by
+the /etc/localtime configuration.
+
+Default value: `false`
+
+##### <a name="-falco--json_include_tags_property"></a>`json_include_tags_property`
+
+Data type: `Boolean`
+
+Whether to include the "tags" field of the rules in the generated JSON output.
+
+Default value: `true`
+
+##### <a name="-falco--rule_matching"></a>`rule_matching`
+
+Data type: `Enum['first', 'all']`
+
+The `rule_matching` configuration key's values are:
+ - `first`: Falco stops checking conditions of rules against upcoming event
+   at the first matching rule
+ - `all`: Falco will continue checking conditions of rules even if a matching
+   one was already found
+
+Default value: `'first'`
+
+##### <a name="-falco--outputs_queue_capacity"></a>`outputs_queue_capacity`
+
+Data type: `Integer`
+
+The maximum number of items allowed in the queue is determined by this value.
+Setting the value to 0 (which is the default) is equivalent to keeping the queue unbounded.
+
+Default value: `0`
+
+##### <a name="-falco--grpc_output"></a>`grpc_output`
+
+Data type: `Boolean`
+
+Whether to use gRPC as an output service.
+
+Default value: `false`
+
+##### <a name="-falco--grpc"></a>`grpc`
+
+Data type: `Hash[String, Variant[Integer, Boolean, String]]`
+
+A hash to configure the grpc server.
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'enabled'      => false,
+    'bind_address' => 'unix:///run/falco/falco.sock',
+    'threadiness'  => 0,
+  }
+```
+
+##### <a name="-falco--output_timeout"></a>`output_timeout`
+
+Data type: `Integer`
+
+The `output_timeout` parameter specifies the duration, in milliseconds, to
+wait before considering the deadline exceeded. By default, the timeout is set
+to 2000ms (2 seconds), meaning that the consumer of Falco outputs can block
+the Falco output channel for up to 2 seconds without triggering a timeout
+error.
+
+Default value: `2000`
+
+##### <a name="-falco--syscall_event_timeouts_max_consecutives"></a>`syscall_event_timeouts_max_consecutives`
+
+Data type: `Integer`
+
+configure the maximum number of consecutive timeouts without
+an event after which Falco will generate an alert.
+The default value is set to 1000.
+
+Default value: `1000`
+
+##### <a name="-falco--syscall_event_drops"></a>`syscall_event_drops`
+
+Data type: `Hash[String, Variant[Array, String, Integer, Boolean]]`
+
+A hash to configure periodic metrics of monotonic counters at a regular
+interval, which include syscall drop statistics and additional metrics,
+explore the `metrics` configuration option.
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'threshold' => '.1',
+    'actions' => ['log', 'alert'],
+    'rate' => '.03333',
+    'max_burst' => 1,
+    'simulate_drops' => false,
+  }
+```
+
+##### <a name="-falco--metrics"></a>`metrics`
+
+Data type: `Hash[String, Variant[Boolean, String]]`
+
+A hash to generate "Falco internal: metrics snapshot" rule output when `priority=info` at minimum
+By selecting `output_file`, equivalent JSON output will be appended to a file.
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'enabled' => false,
+    'interval' => '1h',
+    'output_rule' => true,
+    'resource_utilization_enabled' => true,
+    'state_counters_enabled' => true,
+    'kernel_event_counters_enabled' => true,
+    'libbpf_stats_enabled' => true,
+    'convert_memory_to_mb' => true,
+    'include_empty_values' => false,
+  }
+```
+
+##### <a name="-falco--base_syscalls"></a>`base_syscalls`
+
+Data type: `Hash[String, Variant[Array[String], Boolean]]`
+
+A hash to defne which syscalls are being tracked by falco
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'custom_set' => [],
+    'repair' => false,
+  }
+```
+
+##### <a name="-falco--engine_kind"></a>`engine_kind`
+
+Data type: `Enum['ebpf', 'modern_bpf', 'kmod']`
 
 The desired Falco driver.
-Can be one of "bpf", "modern-bpf", "kmod".
+Can be one of "ebpf", "modern_bpf", "kmod".
 Defaults to "kmod"
 
 Default value: `'kmod'`
+
+##### <a name="-falco--falcoctl_driver_config"></a>`falcoctl_driver_config`
+
+Data type: `Hash`
+
+A hash to configure the falcoctl driver tool
+See the template for available keys.
+
+Default value:
+
+```puppet
+{
+    'type'     => 'kmod',
+    'name'     => 'falco',
+    'repos'    => ['https://download.falco.org/driver'],
+    'version'  => '7.0.0+driver',
+    'hostroot' => '/',
+  }
+```
+
+##### <a name="-falco--falcoctl_install_options"></a>`falcoctl_install_options`
+
+Data type: `Array`
+
+Extra flags to pass to falco-driver-loader
+
+Default value:
+
+```puppet
+[
+    '--compile=true',
+    '--download=false',
+  ]
+```
+
+##### <a name="-falco--falcoctl_install_env"></a>`falcoctl_install_env`
+
+Data type: `Array`
+
+Pass environment variables when running falco-driver-loader
+
+Default value: `[]`
 
 ##### <a name="-falco--package_ensure"></a>`package_ensure`
 
@@ -375,7 +624,7 @@ Data type: `String[1]`
 
 A string to be passed to the package resource's ensure parameter
 
-Default value: `'>= 0.34'`
+Default value: `'>= 0.37.1'`
 
 ##### <a name="-falco--service_ensure"></a>`service_ensure`
 
@@ -409,6 +658,23 @@ Enable automatic rule updates?
 
 Default value: `true`
 
+##### <a name="-falco--manage_dependencies"></a>`manage_dependencies`
+
+Data type: `Boolean`
+
+Enable managing of dependencies?
+
+Default value: `true`
+
+##### <a name="-falco--manage_repo"></a>`manage_repo`
+
+Data type: `Boolean`
+
+When true, let the module manage the repositories.
+Default is true.
+
+Default value: `true`
+
 ### <a name="falco--config"></a>`falco::config`
 
 Controls the contents of falco.yaml and sets up log rotate, if needed
@@ -424,3 +690,4 @@ Manages the repository falco is installed from
 ### <a name="falco--service"></a>`falco::service`
 
 Controls the state of the falco and falcoctl services
+

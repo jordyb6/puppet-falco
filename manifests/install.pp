@@ -7,9 +7,18 @@ class falco::install inherits falco {
     ensure => $falco::package_ensure,
   }
 
+  file { '/etc/falcoctl/falcoctl.yaml':
+    ensure    => file,
+    owner     => 'root',
+    group     => 'root',
+    mode      => '0644',
+    content   => epp('falco/falcoctl.yaml.epp'),
+    subscribe => Package['falco'],
+  }
+
   # Install driver dependencies
   # Dependencies are not required for modern-bpf driver
-  unless $falco::driver == 'modern-bpf' or $falco::build_driver != true {
+  unless $falco::engine_kind == 'modern_bpf' {
     $_suse_kernel_version_sans_default = regsubst($facts['kernelrelease'], '^(.*)-default$', '\\1')
     $_running_kernel_devel_package = $facts['os']['family'] ? {
       'Debian' => "linux-headers-${facts['kernelrelease']}",
@@ -20,20 +29,16 @@ class falco::install inherits falco {
     ensure_packages([$_running_kernel_devel_package], { 'before' => Package['falco'] })
 
     if $falco::manage_dependencies {
-      if $falco::driver == 'bpf' {
-        $_bpf_package_deps = ['llvm','clang','make']
-        ensure_packages($_bpf_package_deps, { 'before' => Package['falco'] })
-      }
-      if $falco::driver == 'kmod' {
-        $_package_deps = ['dkms', 'make']
-        ensure_packages($_package_deps, { 'before' => Package['falco'] })
-      }
+      $_package_deps = ['dkms', 'make']
+      ensure_packages($_package_deps, { 'before' => Package['falco'] })
+      $_bpf_package_deps = ['llvm','clang']
+      ensure_packages($_bpf_package_deps, { 'before' => Package['falco'] })
     }
 
-    $_driver_type = $falco::driver ? {
+    $_driver_type = $falco::engine_kind ? {
       'kmod'  => 'module',
-      'bpf'   => 'bpf',
-      default => fail("The drvier \"${falco::driver}\" is not yet supported by either the module \"${module_name}\" or \"falco-driver-loader\""), # lint:ignore:140chars
+      'ebpf'   => 'bpf',
+      default => fail("The driver \"${falco::engine_kind}\" is not yet supported by either the module \"${module_name}\" or \"falco-driver-loader\""), # lint:ignore:140chars
     }
 
     # Download and compile the desired falco driver based on the currently running kernel version.
@@ -48,28 +53,20 @@ class falco::install inherits falco {
       default  => fail("The module \"${module_name}\" does not yet support \"${facts['os']['family']}\""),
     }
 
-    case $_driver_type {
-      'module': {
-        exec { "falco-driver-loader ${_driver_type} ${falco::falco_driver_loader_option}":
-          creates   => $_kernel_mod_path,
-          path      => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
-          logoutput => true,
-          subscribe => Package[$_running_kernel_devel_package, 'falco'],
-          notify    => Service["falco-${falco::driver}"],
-        }
-      }
-      'bpf': {
-        exec { "falco-driver-loader ${_driver_type} ${falco::falco_driver_loader_option}":
-          creates     => "/root/.falco/${facts['falco_driver_version']}/${facts['os']['architecture']}/falco_${downcase($::operatingsystem)}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
-          environment => $falco::falco_driver_loader_env,
-          path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
-          subscribe   => Package[$_running_kernel_devel_package, 'falco'],
-          notify      => Service["falco-${falco::driver}"],
-        }
-      }
-      default: {
-        fail("The driver \"${_driver_type}\" is not yet supported by either the module \"${module_name}\" or \"falco-driver-loader\"") # lint:ignore:140chars
-      }
+    $_driver_path = $_driver_type ? {
+      'module' => $_kernel_mod_path,
+      'bpf'    => "/root/.falco/${falco::falcoctl_driver_config['version']}/${facts['os']['architecture']}/falco_${downcase($facts['os']['name'])}_${facts['kernelrelease']}_1.o", # lint:ignore:140chars
+    }
+
+    exec { "falcoctl driver install ${falco::falcoctl_install_options.join(' ')}":
+      creates     => $_driver_path,
+      environment => $falco::falcoctl_install_env,
+      path        => '/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin',
+      subscribe   => [
+        Package[$_running_kernel_devel_package, 'falco'],
+        File['/etc/falcoctl/falcoctl.yaml'],
+      ],
+      notify      => Service["falco-${falco::service_name}"],
     }
   }
 }

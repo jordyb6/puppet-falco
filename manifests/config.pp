@@ -10,13 +10,28 @@ class falco::config inherits falco {
       group   => 'root',
       mode    => '0644',
       require => Class['falco::install'],
-      notify  => Service["falco-${falco::driver}"],
+      notify  => Service["falco-${falco::service_name}"],
       ;
     '/etc/falco/falco.yaml':
-      content => template('falco/falco.yaml.erb'),
+      content => epp('falco/falco.yaml.epp'),
       ;
     '/etc/falco/falco_rules.local.yaml':
       content => epp('falco/falco_rules.local.yaml.epp', { 'local_rules' => $falco::local_rules, }),
       ;
+  }
+
+  $_file_output = $falco::file_output
+
+  if ($_file_output != undef) and ($_file_output['enabled']) {
+    logrotate::rule { 'falco_output':
+      path          => $_file_output['filename'],
+      rotate        => 5,
+      rotate_every  => 'day',
+      size          => '1M',
+      missingok     => true,
+      compress      => true,
+      sharedscripts => true,
+      postrotate    => '/usr/bin/killall -USR1 falco',
+    }
   }
 }

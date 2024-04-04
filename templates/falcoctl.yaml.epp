@@ -1,0 +1,12 @@
+<%- | Hash[String, Variant[Array[String], String]] $falcoctl_driver_config = $falco::falcoctl_driver_config,
+| -%>
+
+driver:
+    type: <%= $falcoctl_driver_config['type'] %>
+    name: <%= $falcoctl_driver_config['name'] %>
+    repos:
+<% $falcoctl_driver_config['repos'].each |$repo| { -%>
+        - <%= $repo %>
+<% } -%>
+    version: <%= $falcoctl_driver_config['version'] %>
+    hostroot: <%= $falcoctl_driver_config['hostroot'] %>

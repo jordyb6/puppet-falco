@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v3.0.1](https://github.com/voxpupuli/puppet-falco/tree/v3.0.1) (2023-07-17)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v3.0.0...v3.0.1)
+
+**Merged pull requests:**
+
+- Fix falco fact [\#31](https://github.com/voxpupuli/puppet-falco/pull/31) ([hunner](https://github.com/hunner))
+
+## [v3.0.0](https://github.com/voxpupuli/puppet-falco/tree/v3.0.0) (2023-07-06)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v2.0.0...v3.0.0)
+
+**Breaking changes:**
+
+- Drop Puppet 6 support [\#27](https://github.com/voxpupuli/puppet-falco/pull/27) ([bastelfreak](https://github.com/bastelfreak))
+
+**Implemented enhancements:**
+
+- Add feature flag to enable/disable managing of the falco repository [\#24](https://github.com/voxpupuli/puppet-falco/pull/24) ([jordyb6](https://github.com/jordyb6))
+- Add watch\_config \_files parameter [\#23](https://github.com/voxpupuli/puppet-falco/pull/23) ([jordyb6](https://github.com/jordyb6))
+
+**Fixed bugs:**
+
+- Make falco file output really optional [\#28](https://github.com/voxpupuli/puppet-falco/pull/28) ([claviola](https://github.com/claviola))
+- Fix falco-driver-loader bpf [\#26](https://github.com/voxpupuli/puppet-falco/pull/26) ([jordyb6](https://github.com/jordyb6))
+- Fix: Add missing dependencies when building bpf probe [\#25](https://github.com/voxpupuli/puppet-falco/pull/25) ([jordyb6](https://github.com/jordyb6))
+
 ## [v2.0.0](https://github.com/voxpupuli/puppet-falco/tree/v2.0.0) (2023-04-13)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-falco/compare/v1.2.0...v2.0.0)

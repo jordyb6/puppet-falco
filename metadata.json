@@ -1,6 +1,6 @@
 {
   "name": "puppet-falco",
-  "version": "2.0.1-rc0",
+  "version": "3.0.2-rc0",
   "author": "Vox Pupuli",
   "summary": "Falco: Behavioral Activity Monitoring With Container Support",
   "license": "Apache-2.0",
@@ -10,23 +10,23 @@
   "dependencies": [
     {
       "name": "puppetlabs/apt",
-      "version_requirement": ">= 6.1.0 < 9.0.0"
+      "version_requirement": ">= 6.1.0 < 10.0.0"
     },
     {
       "name": "puppet/epel",
-      "version_requirement": ">= 3.0.0 < 5.0.0"
+      "version_requirement": ">= 3.0.0 < 6.0.0"
     },
     {
       "name": "puppet/logrotate",
-      "version_requirement": ">= 3.4.0 < 7.0.0"
+      "version_requirement": ">= 3.4.0 < 8.0.0"
     },
     {
       "name": "puppet/zypprepo",
-      "version_requirement": ">= 4.0.1 < 5.0.0"
+      "version_requirement": ">= 4.0.1 < 6.0.0"
     },
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 8.2.0 < 9.0.0"
+      "version_requirement": ">= 8.2.0 < 10.0.0"
     },
     {
       "name": "stschulte/rpmkey",
@@ -51,7 +51,6 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "10",
         "11"
       ]
     },
@@ -72,7 +71,6 @@
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "18.04",
         "20.04",
         "22.04"
       ]
@@ -81,7 +79,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 6.21.0 < 8.0.0"
+      "version_requirement": ">= 7.0.0 < 9.0.0"
     }
   ]
 }
