@@ -13,7 +13,7 @@ class falco::config inherits falco {
       notify  => Service["falco-${falco::service_name}"],
       ;
     '/etc/falco/falco.yaml':
-      content => template('falco/falco.yaml.epp'),
+      content => epp('falco/falco.yaml.epp'),
       ;
     '/etc/falco/falco_rules.local.yaml':
       content => epp('falco/falco_rules.local.yaml.epp', { 'local_rules' => $falco::local_rules, }),
