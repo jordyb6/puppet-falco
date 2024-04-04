@@ -359,7 +359,7 @@ class falco (
     'repair' => false,
   },
 
-  Enum['ebpf', 'modern_bpf', 'kmod'] $engine_kind = 'kmod',
+  Enum['ebpf', 'modern_ebpf', 'kmod'] $engine_kind = 'kmod',
 
   # Parameters for falcoctl command
   Hash $falcoctl_driver_config = {
@@ -388,9 +388,9 @@ class falco (
   Boolean $manage_dependencies = true,
 ) {
   $service_name = $falco::engine_kind ? {
-    'kmod'        => 'kmod',
-    'ebpf'        => 'bpf',
-    'modern_bpf'  => 'modern-bpf',
+    'kmod'         => 'kmod',
+    'ebpf'         => 'bpf',
+    'modern_ebpf'  => 'modern-bpf',
     default => fail(" Service \"falco-${falco::engine_kind}\" is not yet supported by either the module \"${module_name}\" or \"falco\""),
   }
 
