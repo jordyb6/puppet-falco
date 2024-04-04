@@ -121,6 +121,10 @@
 #   log level of falco's internal logging. Can be one of "emergency",
 #   "alert", "critical", "error", "warning", "notice", "info", "debug".
 #
+# @param libs_logger
+#   Hash to enable the libs logger sending its log records the same outputs
+#   supported by falco (stderr and syslog).
+#
 # @param priority
 #   Minimum rule priority level to load and run. All rules having a
 #   priority more severe than this level will be loaded/run.  Can be one
@@ -130,12 +134,6 @@
 # @param buffered_outputs
 #   Whether or not output to any of the output channels below is
 #   buffered. Defaults to false
-#
-# @param outputs_rate
-#   The number of tokens (i.e. right to send a notification) gained per second.
-#
-# @param outputs_max_burst
-#   The maximum number of tokens outstanding.
 #
 # @param syslog_output
 #   A hash to configure the syslog output.
@@ -160,6 +158,70 @@
 # @param http_output
 #   A hash to configure the http output.
 #   See the template for available keys.
+#
+# @param engine_options
+#    A hash to configure engine options.
+#    See the template for available keys.
+#
+# @param load_plugins
+#    An array to specify which plugins to load.
+#
+# @param plugins
+#    A hash to specify plugin specific options.
+#    See the template for available keys.
+#
+# @param time_format_iso_8601
+#    When enabled, Falco will display log and output messages with times in the ISO
+#    8601 format. By default, times are shown in the local time zone determined by
+#    the /etc/localtime configuration.
+#
+# @param json_include_tags_property
+#    Whether to include the "tags" field of the rules in the generated JSON output.
+#
+# @param rule_matching
+#    The `rule_matching` configuration key's values are:
+#     - `first`: Falco stops checking conditions of rules against upcoming event
+#       at the first matching rule
+#     - `all`: Falco will continue checking conditions of rules even if a matching 
+#       one was already found
+#
+# @param outputs_queue_capacity 
+#    The maximum number of items allowed in the queue is determined by this value.
+#    Setting the value to 0 (which is the default) is equivalent to keeping the queue unbounded.
+#
+# @param grpc_output
+#    Whether to use gRPC as an output service.
+#
+# @param grpc
+#    A hash to configure the grpc server.
+#    See the template for available keys.
+#
+# @param output_timeout
+#    The `output_timeout` parameter specifies the duration, in milliseconds, to
+#    wait before considering the deadline exceeded. By default, the timeout is set
+#    to 2000ms (2 seconds), meaning that the consumer of Falco outputs can block
+#    the Falco output channel for up to 2 seconds without triggering a timeout
+#    error.
+#
+# @param syscall_event_timeouts_max_consecutives
+#    configure the maximum number of consecutive timeouts without
+#    an event after which Falco will generate an alert.
+#    The default value is set to 1000.
+#
+# @param syscall_event_drops
+#    A hash to configure periodic metrics of monotonic counters at a regular
+#    interval, which include syscall drop statistics and additional metrics,
+#    explore the `metrics` configuration option.
+#    See the template for available keys.
+#
+# @param metrics
+#    A hash to generate "Falco internal: metrics snapshot" rule output when `priority=info` at minimum
+#    By selecting `output_file`, equivalent JSON output will be appended to a file.
+#    See the template for available keys.
+#
+# @param base_syscalls
+#    A hash to defne which syscalls are being tracked by falco
+#    See the template for available keys.
 #
 # @param engine_kind
 #  The desired Falco driver.
