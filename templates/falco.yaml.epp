@@ -1,9 +1,10 @@
-<%- | Array[Stdlib::Absolutepath]                                                           $rules_file                              = $falco::rules_file,
+<%- | Array[Stdlib::Absolutepath]                                                           $config_files                            = $falco::config_files,
+      Boolean                                                                               $watch_config_files                      = $falco::watch_config_files,
+      Array[Stdlib::Absolutepath]                                                           $rules_files                             = $falco::rules_files,
       Enum['kmod', 'ebpf', 'modern_ebpf']                                                   $engine_kind                             = $falco::engine_kind,
       Hash                                                                                  $engine_options                          = $falco::engine_options,
       Optional[Array[String]]                                                               $load_plugins                            = $falco::load_plugins,
       Optional[Array[Hash]]                                                                 $plugins                                 = $falco::plugins,
-      Boolean                                                                               $watch_config_files                      = $falco::watch_config_files,
       Boolean                                                                               $time_format_iso_8601                    = $falco::time_format_iso_8601,
       Enum['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] $priority                                = $falco::priority,
       Boolean                                                                               $json_output                             = $falco::json_output,
@@ -29,10 +30,11 @@
       Hash                                                                                  $syscall_event_drops                     = $falco::syscall_event_drops,
       Hash[String, Variant[Boolean, String]]                                                $metrics                                 = $falco::metrics,
       Hash[String, Variant[Array[String], Boolean]]                                         $base_syscalls                           = $falco::base_syscalls,
+      Integer                                                                               $thread_table_size                       = $falco::thread_table_size,
 | -%>
-##############################################
-# THIS FILE MANAGED BY PUPPET. DO NOT MODIFY #
-##############################################
+#################################################
+# THIS FILE IS MANAGED BY PUPPET. DO NOT MODIFY #
+#################################################
 # SPDX-License-Identifier: Apache-2.0
 #
 # Copyright (C) 2023 The Falco Authors.
@@ -60,46 +62,64 @@
 #
 #     (Falco command-line arguments)
 #     (Falco environment variables)
+# Falco config files settings
+#     config_files [Stable]
+#     watch_config_files [Stable]
 # Falco rules files
-#     rules_file
+#     rules_files [Stable]
+# Falco rules
+#     rules [Incubating]
 # Falco engine
-#     engine
+#     engine [Stable]
 # Falco plugins
-#     load_plugins
-#     plugins
-# Falco config files
-#     watch_config_files
+#     load_plugins [Stable]
+#     plugins [Stable]
 # Falco outputs settings
-#     time_format_iso_8601
-#     priority
-#     json_output
-#     json_include_output_property
-#     json_include_tags_property
-#     buffered_outputs
-#     rule_matching
-#     outputs_queue
+#     time_format_iso_8601 [Stable]
+#     priority [Stable]
+#     json_output [Stable]
+#     json_include_output_property [Stable]
+#     json_include_tags_property [Stable]
+#     buffered_outputs [Stable]
+#     rule_matching [Incubating]
+#     outputs_queue [Stable]
 # Falco outputs channels
-#     stdout_output
-#     syslog_output
-#     file_output
-#     http_output
-#     program_output
-#     grpc_output
+#     stdout_output [Stable]
+#     syslog_output [Stable]
+#     file_output [Stable]
+#     http_output [Stable]
+#     program_output [Stable]
+#     grpc_output [Stable]
 # Falco exposed services
-#     grpc
-#     webserver
+#     grpc [Stable]
+#     webserver [Stable]
 # Falco logging / alerting / metrics related to software functioning (basic)
-#     log_stderr
-#     log_syslog
-#     log_level
-#     libs_logger
+#     log_stderr [Stable]
+#     log_syslog [Stable]
+#     log_level [Stable]
+#     libs_logger [Stable]
 # Falco logging / alerting / metrics related to software functioning (advanced)
-#     output_timeout
-#     syscall_event_timeouts
-#     syscall_event_drops -> [CHANGE NOTICE] Automatic notifications will be simplified in Falco 0.38! If you depend on the detailed drop counters payload, use 'metrics.output_rule' along with 'metrics.kernel_event_counters_enabled' instead
-#     metrics
+#     output_timeout [Stable]
+#     syscall_event_timeouts [Stable]
+#     syscall_event_drops [Stable] -> [CHANGE NOTICE] Automatic notifications will be simplified in Falco 0.38! If you depend on the detailed drop counters payload, use 'metrics.output_rule' along with 'metrics.kernel_event_counters_enabled' instead
+#     metrics [Stable]
 # Falco performance tuning (advanced)
-#     base_syscalls
+#     base_syscalls [Stable]
+# Falco libs
+#     falco_libs [Incubating]
+
+########################
+# Config maturity tags #
+########################
+
+# As per features adoption and deprecation proposal we support 4 levels of configuration keys maturity:
+# * Sandbox -> Experimental/alpha features, not recommended for production use, can be removed at any time without further notice.
+# * Incubating -> Beta features, long-term support is not guaranteed.
+# * Stable -> General Availability (GA) features for which long-term support is expected.
+# * Deprecated -> Deprecated keys, soon to be removed.
+#
+# For more info, please take a look at the proposal: https://github.com/falcosecurity/falco/blob/master/proposals/20231220-features-adoption-and-deprecation.md.
+
 
 ################################
 # Falco command-line arguments #
@@ -147,15 +167,46 @@
 # disabling the automatic artifacts followed by falcoctl.
 
 
+###############################
+# Falco config files settings #
+###############################
+
+# [Stable] `config_files`
+#
+# Falco will load additional configs files specified here.
+# Their loading is assumed to be made *after* main config file has been processed,
+# exactly in the order they are specified.
+# Therefore, loaded config files *can* override values from main config file.
+# Also, nested include is not allowed, ie: included config files won't be able to include other config files.
+#
+# Like for 'rules_files', specifying a folder will load all the configs files present in it in a lexicographical order.
+config_files:
+<%- $config_files.each |$file| { -%>
+  - <%= $file %>
+<%- } -%>
+
+# [Stable] `watch_config_files`
+#
+# Falco monitors configuration and rules files for changes and automatically
+# reloads itself to apply the updated configuration when any modifications are
+# detected. This feature is particularly useful when you want to make real-time
+# changes to the configuration or rules of Falco without interrupting its
+# operation or losing its state. For more information about Falco's state
+# engine, please refer to the `base_syscalls` section.
+watch_config_files: <%= $watch_config_files %>
+
 #####################
 # Falco rules files #
 #####################
 
-# [Stable] `rules_file`
+# [Stable] `rules_files`
+
+# NOTICE: Before Falco 0.38, this config key was `rules_file` (singular form), which is now deprecated in favor of `rules_files` (plural form).
 #
 # Falco rules can be specified using files or directories, which are loaded at
-# startup. The name "rules_file" is maintained for backwards compatibility. If
-# the entry is a file, it will be read directly. If the entry is a directory,
+# startup.
+#
+# If the entry is a file, it will be read directly. If the entry is a directory,
 # all files within that directory will be read in alphabetical order.
 #
 # The falco_rules.yaml file ships with the Falco package and is overridden with
@@ -184,10 +235,43 @@
 # "first match wins" principle. However, enabling the `all` matching option may result
 # in a performance penalty. We recommend carefully testing this alternative setting  
 # before deploying it in production. Read more under the `rule_matching` configuration.
-rules_file:
-<%- $rules_file.each |$file| { -%>
+rules_files:
+<%- $rules_files.each |$file| { -%>
   - <%= $file %>
 <%- } -%>
+
+# [Incubating] `rules`
+#
+# --- [Description]
+#
+# Falco rules can be enabled or disabled by name (with wildcards *) and/or by tag.
+#
+# This configuration is applied after all rules files have been loaded, including
+# their overrides, and will take precedence over the enabled/disabled configuration
+# specified or overridden in the rules files.
+#
+# The ordering matters and selections are evaluated in order. For instance, if you
+# need to only enable a rule you would first disable all of them and then only
+# enable what you need, regardless of the enabled status in the files.
+#
+# --- [Examples]
+#
+# Only enable two rules:
+#
+# rules:
+#   - disable:
+#       rule: "*"
+#   - enable:
+#       rule: Netcat Remote Code Execution in Container
+#   - enable:
+#       rule: Delete or rename shell history
+#
+# Disable all rules with a specific tag:
+#
+# rules:
+#   - disable:
+#       tag: network
+#
 
 ################
 # Falco engine #
@@ -354,35 +438,6 @@ rules_file:
 # If you have low event throughputs and minimal drops, reducing the number of
 # buffers (higher `cpus_for_each_buffer`) can lower the memory footprint.
 #
-###########
-# EXAMPLE #
-###########
-#
-# engine:
-#   kind: kmod
-#   kmod:
-#     buf_size_preset: 4
-#     drop_failed_exit: false
-#   ebpf:
-#     # path to the elf file to load.
-#     probe: ${HOME}/.falco/falco-bpf.o
-#     buf_size_preset: 4
-#     drop_failed_exit: false
-#   modern_ebpf:
-#     cpus_for_each_buffer: 2
-#     buf_size_preset: 4
-#     drop_failed_exit: false
-#   replay:
-#     # path to the capture file to replay (eg: /path/to/file.scap)
-#     capture_file: ""
-#   gvisor:
-#     # A Falco-compatible configuration file can be generated with
-#     # '--gvisor-generate-config' and utilized for both runsc and Falco.
-#     config: ""
-#     # Set gVisor root directory for storage of container state when used
-#     # in conjunction with 'gvisor.config'. The 'gvisor.root' to be passed
-#     # is the one usually passed to 'runsc --root' flag.
-#     root: ""
 engine:
   kind: <%= $engine_kind %>
   <%= $engine_kind %>:
@@ -443,20 +498,6 @@ plugins:
 <% } -%>
 <% } -%>
 
-######################
-# Falco config files #
-######################
-
-# [Stable] `watch_config_files`
-#
-# Falco monitors configuration and rule files for changes and automatically
-# reloads itself to apply the updated configuration when any modifications are
-# detected. This feature is particularly useful when you want to make real-time
-# changes to the configuration or rules of Falco without interrupting its
-# operation or losing its state. For more information about Falco's state
-# engine, please refer to the `base_syscalls` section.
-watch_config_files: <%= $watch_config_files %>
-
 
 ##########################
 # Falco outputs settings #
@@ -478,7 +519,6 @@ time_format_iso_8601: <%= $time_format_iso_8601 %>
 # levels: "emergency", "alert", "critical", "error", "warning", "notice",
 # "info", "debug"
 priority: <%= $priority %>
-
 
 # [Stable] `json_output`
 #
@@ -505,7 +545,6 @@ json_include_output_property: <%= $json_include_output_property %>
 # be added at a later stage, it is recommended to turn it off.
 json_include_tags_property: <%= $json_include_tags_property %>
 
-
 # [Stable] `buffered_outputs`
 #
 # Enabling buffering for the output queue can offer performance optimization,
@@ -513,7 +552,7 @@ json_include_tags_property: <%= $json_include_tags_property %>
 # output mechanism. By default, buffering is disabled (false).
 buffered_outputs: <%= $buffered_outputs %>
 
-# [Experimental] `rule_matching`
+# [Incubating] `rule_matching`
 #
 # The `rule_matching` configuration key's values are:
 #  - `first`: Falco stops checking conditions of rules against upcoming event
@@ -554,6 +593,7 @@ rule_matching: <%= $rule_matching %>
 # kernel-side event drops when the buffer between kernel space and user space is full.
 outputs_queue:
   capacity: <%= $outputs_queue_capacity %>
+
 
 ##########################
 # Falco outputs channels #
@@ -654,6 +694,7 @@ program_output:
 grpc_output:
   enabled: <%= $grpc_output %>
 
+
 ##########################
 # Falco exposed services #
 ##########################
@@ -735,8 +776,14 @@ webserver:
   # Can be an IPV4 or IPV6 address, defaults to IPV4
   listen_address: <%= $webserver['listen_address'] %>
   k8s_healthz_endpoint: <%= $webserver['k8s_healthz_endpoint'] %>
+  # [Incubating] `prometheus_metrics_enabled`
+  #
+  # Enable the metrics endpoint providing Prometheus values
+  # It will only have an effect if metrics.enabled is set to true as well.
+  prometheus_metrics_enabled: <%= $webserver['prometheus_metrics_enabled'] %>
   ssl_enabled: <%= $webserver['ssl_enabled'] %>
   ssl_certificate: <%= $webserver['ssl_certificate'] %>
+
 
 ##############################################################################
 # Falco logging / alerting / metrics related to software functioning (basic) #
@@ -761,7 +808,6 @@ log_syslog: <%= $log_syslog %>
 # "error", "warning", "notice", "info", "debug".
 log_level: <%= $log_level %>
 
-
 # [Stable] `libs_logger`
 #
 # The `libs_logger` setting in Falco determines the minimum log level to include
@@ -777,6 +823,7 @@ log_level: <%= $log_level %>
 libs_logger:
   enabled: <%= $libs_logger['enabled'] %>
   severity: <%= $webserver['severity'] %>
+
 
 #################################################################################
 # Falco logging / alerting / metrics related to software functioning (advanced) #
@@ -825,7 +872,6 @@ output_timeout: <%= $output_timeout %>
 # depends on the CPU frequency.
 syscall_event_timeouts:
   max_consecutives: <%= $syscall_event_timeouts_max_consecutives %>
-
 
 # [Stable] `syscall_event_drops` -> [CHANGE NOTICE] Automatic notifications will be simplified in Falco 0.38! If you depend on the detailed drop counters payload, use 'metrics.output_rule' along with 'metrics.kernel_event_counters_enabled' instead
 #
@@ -965,6 +1011,8 @@ syscall_event_drops:
 # as Falco does not automatically rotate the file. It can be used in combination
 # with `output_rule`.
 #
+# `rules_counters_enabled`: Emit counts for each rule.
+#
 # `resource_utilization_enabled`: Emit CPU and memory usage metrics. CPU usage
 # is reported as a percentage of one CPU and can be normalized to the total
 # number of CPUs to determine overall usage. Memory metrics are provided in raw
@@ -1008,21 +1056,26 @@ syscall_event_drops:
 # beneficial for exploring the data schema and ensuring that fields with empty
 # values are included in the output.
 #
-# todo: prometheus export option
+# If metrics are enabled, the web server can be configured to activate the
+# corresponding Prometheus endpoint using `webserver.prometheus_metrics_enabled`.
+# Prometheus output can be used in combination with the other output options.
+#
 # todo: syscall_counters_enabled option
 metrics:
-  enabled: <%= $syscall_event_drops['metrics'] %>
-  interval: <%= $syscall_event_drops['interval'] %>
+  enabled: <%= $metrics['metrics'] %>
+  interval: <%= $metrics['interval'] %>
   # Typically, in production, you only use `output_rule` or `output_file`, but not both. 
   # However, if you have a very unique use case, you can use both together.
-  output_rule: <%= $syscall_event_drops['output_rule'] %>
+  # Set `webserver.prometheus_metrics_enabled` for Prometheus output.
+  output_rule: <%= $metrics['output_rule'] %>
   # output_file: /tmp/falco_stats.jsonl
-  resource_utilization_enabled: <%= $syscall_event_drops['resource_utilization_enabled'] %>
-  state_counters_enabled: <%= $syscall_event_drops['state_counters_enabled'] %>
-  kernel_event_counters_enabled: <%= $syscall_event_drops['kernel_event_counters_enabled'] %>
-  libbpf_stats_enabled: <%= $syscall_event_drops['libbpf_stats_enabled'] %>
-  convert_memory_to_mb: <%= $syscall_event_drops['convert_memory_to_mb'] %>
-  include_empty_values: <%= $syscall_event_drops['include_empty_values'] %>
+  rules_counters_enabled: <%= $metrics['rules_counters_enabled'] %>
+  resource_utilization_enabled: <%= $metrics['resource_utilization_enabled'] %>
+  state_counters_enabled: <%= $metrics['state_counters_enabled'] %>
+  kernel_event_counters_enabled: <%= $metrics['kernel_event_counters_enabled'] %>
+  libbpf_stats_enabled: <%= $metrics['libbpf_stats_enabled'] %>
+  convert_memory_to_mb: <%= $metrics['convert_memory_to_mb'] %>
+  include_empty_values: <%= $metrics['include_empty_values'] %>
 
 #######################################
 # Falco performance tuning (advanced) #
@@ -1142,3 +1195,57 @@ metrics:
 base_syscalls:
   custom_set: [<%= $base_syscalls['custom_set'].join(', ') %>]
   repair: <%= $base_syscalls['repair'] %>
+
+##############
+# Falco libs #
+##############
+
+# [Incubating] `falco_libs`
+#
+# `thread_table_size`
+#
+# Set the maximum number of entries (the absolute maximum value can only be MAX UINT32) 
+# for Falco's internal threadtable (process cache). Please note that Falco operates at a 
+# granular level, focusing on individual threads. Falco rules reference the thread leader 
+# as the process. The size of the threadtable should typically be much higher than the 
+# number of currently alive processes. The default value should work well on modern 
+# infrastructures and be sufficient to absorb bursts.
+#
+# Reducing its size can help in better memory management, but as a consequence, your 
+# process tree may be more frequently disrupted due to missing threads. You can explore 
+# `metrics.state_counters_enabled` to measure how the internal state handling is performing, 
+# and the fields called `n_drops_full_threadtable` or `n_store_evts_drops` will inform you
+# if you should increase this value for optimal performance.
+falco_libs:
+  thread_table_size: <%= $thread_table_size %>
+
+# [Stable] Guidance for Kubernetes container engine command-line args settings
+#
+# Modern cloud environments, particularly Kubernetes, heavily rely on
+# containerized workload deployments. When capturing events with Falco, it
+# becomes essential to identify the owner of the workload for which events are
+# being captured, such as syscall events. Falco integrates with the container
+# runtime to enrich its events with container information, including fields like
+# `container.image.repository`, `container.image.tag`, ... , `k8s.ns.name`,
+# `k8s.pod.name`, `k8s.pod.*` in the Falco output (Falco retrieves Kubernetes
+# namespace and pod name directly from the container runtime, see
+# https://falco.org/docs/reference/rules/supported-fields/#field-class-container).
+#
+# Furthermore, Falco exposes container events themselves as a data source for
+# alerting. To achieve this integration with the container runtime, Falco
+# requires access to the runtime socket. By default, for Kubernetes, Falco
+# attempts to connect to the following sockets:
+# "/run/containerd/containerd.sock", "/run/crio/crio.sock",
+# "/run/k3s/containerd/containerd.sock". If you have a custom path, you can use
+# the `--cri` option to specify the correct location.
+#
+# In some cases, you may encounter empty fields for container metadata. To
+# address this, you can explore the `--disable-cri-async` option, which disables
+# asynchronous fetching if the fetch operation is not completing quickly enough.
+#
+# To get more information on these command-line arguments, you can run `falco
+# --help` in your terminal to view their current descriptions.
+#
+# !!! The options mentioned here are not available in the falco.yaml
+# configuration file. Instead, they can can be used as a command-line argument
+# when running the Falco command.
