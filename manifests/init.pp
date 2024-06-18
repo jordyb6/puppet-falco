@@ -266,11 +266,15 @@
 #
 class falco (
   # Configuration parameters
-  Array[Stdlib::Absolutepath] $rules_file = [
+  Array[Stdlib::Absolutepath] $rules_files = [
     '/etc/falco/falco_rules.yaml',
     '/etc/falco/falco_rules.local.yaml',
     '/etc/falco/k8s_audit_rules.yaml',
     '/etc/falco/rules.d',
+  ],
+
+  Array[Stdlib::Absolutepath] $config_files = [
+    '/etc/falco/config.d',
   ],
   Array[Hash] $local_rules = [],
   Hash $engine_options = {
@@ -328,6 +332,7 @@ class falco (
     'listen_port' => 8765,
     'listen_address' => '0.0.0.0',
     'k8s_healthz_endpoint' => '/healthz',
+    'prometheus_metrics_enabled' => false,
     'ssl_enabled' => false,
     'ssl_certificate' => '/etc/falco/falco.pem',
   },
@@ -351,6 +356,7 @@ class falco (
     'enabled' => false,
     'interval' => '1h',
     'output_rule' => true,
+    'rules_counters_enabled' => true,
     'resource_utilization_enabled' => true,
     'state_counters_enabled' => true,
     'kernel_event_counters_enabled' => true,
@@ -362,6 +368,7 @@ class falco (
     'custom_set' => [],
     'repair' => false,
   },
+  Integer $thread_table_size = 262144,
 
   Enum['ebpf', 'modern_ebpf', 'kmod'] $engine_kind = 'kmod',
 
