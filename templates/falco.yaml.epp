@@ -1062,7 +1062,7 @@ syscall_event_drops:
 #
 # todo: syscall_counters_enabled option
 metrics:
-  enabled: <%= $metrics['metrics'] %>
+  enabled: <%= $metrics['enabled'] %>
   interval: <%= $metrics['interval'] %>
   # Typically, in production, you only use `output_rule` or `output_file`, but not both. 
   # However, if you have a very unique use case, you can use both together.
